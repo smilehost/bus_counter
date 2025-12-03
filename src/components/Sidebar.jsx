@@ -2,6 +2,7 @@
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import {
   Drawer,
   List,
@@ -23,15 +24,15 @@ import { LayoutDashboard, Camera, Bus } from "lucide-react";
 const drawerWidth = 240;
 
 const menus = [
-  { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: [1, 2, 3] },
+  { label: "sidebar.dashboard", path: "/", icon: LayoutDashboard, roles: [1, 2, 3] },
   {
-    label: "Manage Camera",
+    label: "sidebar.manage_camera",
     path: "/manage-camera",
     icon: Camera,
     roles: [1, 2],
   },
   {
-    label: "Manage Bus Door",
+    label: "sidebar.manage_busdoor",
     path: "/manage-busdoor",
     icon: Bus,
     roles: [1, 2],
@@ -39,6 +40,7 @@ const menus = [
 ];
 
 export default function Sidebar({ role, open, onClose }) {
+  const { t } = useTranslation();
   const primaryColor = "#1976D2";
   const secondaryColor = "#64B5F6";
   const shadowColor = "rgba(25, 118, 210, 0.25)";
@@ -100,7 +102,7 @@ export default function Sidebar({ role, open, onClose }) {
             alignItems: "center",
           }}
         >
-          BusCounter
+          {t('app.title')}
         </Typography>
       </Toolbar>
 
@@ -187,7 +189,7 @@ export default function Sidebar({ role, open, onClose }) {
                   <item.icon />
                 </ListItemIcon>
                 <ListItemText
-                  primary={item.label}
+                  primary={t(item.label)}
                   primaryTypographyProps={{
                     fontSize: { xs: "0.875rem", sm: "0.95rem" },
                     fontWeight: isActive ? "bold" : "normal",
@@ -204,7 +206,7 @@ export default function Sidebar({ role, open, onClose }) {
         })}
       </List>
       <Divider />
-      
+
     </Box>
   );
 

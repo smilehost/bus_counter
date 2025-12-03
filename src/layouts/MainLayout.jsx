@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import Sidebar from "../components/Sidebar";
+import { useTranslation } from 'react-i18next';
 
 // MUI Components
 import {
@@ -14,6 +15,8 @@ import {
   CssBaseline,
   Avatar,
   Stack,
+  Button,
+  ButtonGroup
 } from "@mui/material";
 
 // MUI Icons
@@ -39,12 +42,17 @@ const getRoleName = (roleId) => {
 
 export default function MainLayout() {
   const { user } = useAuthStore();
+  const { t, i18n } = useTranslation();
   // 💡 สถานะสำหรับควบคุมการเปิด/ปิด Sidebar
   const [openSidebar, setOpenSidebar] = useState(false);
 
   // 💡 ฟังก์ชันสำหรับ Toggle สถานะ
   const handleDrawerToggle = () => {
     setOpenSidebar(!openSidebar);
+  };
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
   };
 
   return (
@@ -114,6 +122,32 @@ export default function MainLayout() {
           </Stack>
 
           <Box sx={{ flexGrow: 1 }} />
+
+          {/* Language Switcher */}
+          <ButtonGroup variant="text" size="small" aria-label="language switcher">
+            <Button
+              onClick={() => changeLanguage('en')}
+              sx={{
+                color: i18n.language === 'en' ? primaryColor : 'text.secondary',
+                fontWeight: i18n.language === 'en' ? 'bold' : 'normal',
+                minWidth: 'auto',
+                px: 1
+              }}
+            >
+              EN
+            </Button>
+            <Button
+              onClick={() => changeLanguage('th')}
+              sx={{
+                color: i18n.language === 'th' ? primaryColor : 'text.secondary',
+                fontWeight: i18n.language === 'th' ? 'bold' : 'normal',
+                minWidth: 'auto',
+                px: 1
+              }}
+            >
+              TH
+            </Button>
+          </ButtonGroup>
         </Toolbar>
       </AppBar>
 

@@ -1,0 +1,55 @@
+{
+    "app": {
+        "title": "Bus Counter"
+    },
+    "sidebar": {
+        "dashboard": "แดชบอร์ด",
+        "manage_camera": "จัดการกล้อง",
+        "manage_busdoor": "จัดการประตูรถเมล์",
+        "settings": "ตั้งค่า",
+        "logout": "ออกจากระบบ"
+    },
+    "dashboard": {
+        "title": "แดชบอร์ด",
+        "subtitle": "ภาพรวมธุรกรรมและสถิติวันนี้",
+        "total_passengers": "ผู้โดยสารทั้งหมด",
+        "total_revenue": "รายได้ทั้งหมด",
+        "active_routes": "เส้นทางที่เปิดให้บริการ",
+        "from_yesterday": "จากเมื่อวาน",
+        "today": "วันนี้",
+        "transactions_by_payment": "ธุรกรรมแยกตามวิธีการชำระเงิน",
+        "revenue_by_route": "รายได้แยกตามเส้นทาง",
+        "recent_transactions": "ธุรกรรมล่าสุด",
+        "bar_chart": "แผนภูมิแท่ง",
+        "pie_chart": "แผนภูมิวงกลม"
+    },
+    "filters": {
+        "label": "ตัวกรอง:",
+        "all_companies": "ทุกบริษัท",
+        "all_routes": "ทุกเส้นทาง",
+        "all_provinces": "ทุกจังหวัด",
+        "date": {
+            "today": "วันนี้",
+            "yesterday": "เมื่อวาน",
+            "last_7_days": "7 วันย้อนหลัง",
+            "last_30_days": "30 วันย้อนหลัง",
+            "this_month": "เดือนนี้",
+            "last_month": "เดือนที่แล้ว"
+        }
+    },
+    "table": {
+        "id": "รหัส",
+        "route": "เส้นทาง",
+        "passengers": "ผู้โดยสาร",
+        "revenue": "รายได้",
+        "time": "เวลา",
+        "status": "สถานะ",
+        "completed": "เสร็จสิ้น",
+        "in_progress": "กำลังดำเนินการ",
+        "scheduled": "กำหนดการ",
+        "showing": "แสดง",
+        "to": "ถึง",
+        "of": "จาก",
+        "entries": "รายการ"
+    }
+}

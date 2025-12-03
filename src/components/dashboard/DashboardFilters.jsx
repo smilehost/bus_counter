@@ -1,5 +1,6 @@
 import React from "react";
 import { Filter } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardFilters({
     company,
@@ -9,12 +10,14 @@ export default function DashboardFilters({
     route,
     onRouteChange
 }) {
+    const { t } = useTranslation();
+
     return (
         <div className="bg-white rounded-lg p-4 shadow-sm">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <div className="flex items-center gap-2 text-gray-600">
                     <Filter size={18} />
-                    <span className="text-sm font-medium">Filters:</span>
+                    <span className="text-sm font-medium">{t('filters.label')}</span>
                 </div>
 
                 {/* Company Filter */}
@@ -23,7 +26,7 @@ export default function DashboardFilters({
                     onChange={(e) => onCompanyChange(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                    <option value="all">All Companies</option>
+                    <option value="all">{t('filters.all_companies')}</option>
                     <option value="company_a">Company A</option>
                     <option value="company_b">Company B</option>
                     <option value="company_c">Company C</option>
@@ -35,17 +38,12 @@ export default function DashboardFilters({
                     onChange={(e) => onDateRangeChange(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                    <option value="today">Today</option>
-                    <option value="all_day">All Day</option>
-                    <option value="morning">Morning</option>
-                    <option value="afternoon">Afternoon</option>
-                    <option value="evening">Evening</option>
-                    <option value="night">Night</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="last_7_days">Last 7 Days</option>
-                    <option value="last_30_days">Last 30 Days</option>
-                    <option value="this_month">This Month</option>
-                    <option value="last_month">Last Month</option>
+                    <option value="today">{t('filters.date.today')}</option>
+                    <option value="yesterday">{t('filters.date.yesterday')}</option>
+                    <option value="last_7_days">{t('filters.date.last_7_days')}</option>
+                    <option value="last_30_days">{t('filters.date.last_30_days')}</option>
+                    <option value="this_month">{t('filters.date.this_month')}</option>
+                    <option value="last_month">{t('filters.date.last_month')}</option>
                 </select>
 
                 {/* Route Filter */}
@@ -54,7 +52,7 @@ export default function DashboardFilters({
                     onChange={(e) => onRouteChange(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                    <option value="all">All Routes</option>
+                    <option value="all">{t('filters.all_routes')}</option>
                     <option value="route_a">Route A</option>
                     <option value="route_b">Route B</option>
                     <option value="route_c">Route C</option>

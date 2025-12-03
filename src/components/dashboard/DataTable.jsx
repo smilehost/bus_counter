@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export default function DataTable({ data, columns, itemsPerPage = 10 }) {
     const [currentPage, setCurrentPage] = useState(1);
+    const { t } = useTranslation();
 
     // Calculate pagination
     const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -81,7 +83,7 @@ export default function DataTable({ data, columns, itemsPerPage = 10 }) {
             {/* Pagination */}
             <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                    Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of {data.length} entries
+                    {t('table.showing')} {startIndex + 1} {t('table.to')} {Math.min(endIndex, data.length)} {t('table.of')} {data.length} {t('table.entries')}
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -101,8 +103,8 @@ export default function DataTable({ data, columns, itemsPerPage = 10 }) {
                                 key={page}
                                 onClick={() => goToPage(page)}
                                 className={`px-3 py-1 rounded text-sm ${currentPage === page
-                                    ? 'bg-blue-500 text-white'
-                                    : 'hover:bg-gray-100 text-gray-700'
+                                        ? 'bg-blue-500 text-white'
+                                        : 'hover:bg-gray-100 text-gray-700'
                                     }`}
                             >
                                 {page}
