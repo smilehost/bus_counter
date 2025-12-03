@@ -6,8 +6,12 @@ import Dashboard from "./pages/Dashboard";
 import ManageCamera from "./pages/ManageCamera";
 import ManageBusDoor from "./pages/ManageBusDoor";
 
+// ✅ Import แค่ตัวนี้ตัวเดียวพอ (เพราะข้างในมันจัดการ Notistack + Configurator ให้แล้ว)
+import { ToastProvider } from "./components/ToastProvider";
+
 export default function App() {
   return (
+    <ToastProvider>
     <BrowserRouter>
       <Routes>
         <Route element={<MainLayout />}>
@@ -40,5 +44,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </ToastProvider>
   );
 }
