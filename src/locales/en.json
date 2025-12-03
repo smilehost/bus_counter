@@ -1,0 +1,55 @@
+{
+    "app": {
+        "title": "Bus Counter"
+    },
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "manage_camera": "Manage Camera",
+        "manage_busdoor": "Manage Bus Door",
+        "settings": "Settings",
+        "logout": "Logout"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Today's overview of transactions and statistics",
+        "total_passengers": "Total Passengers",
+        "total_revenue": "Total Revenue",
+        "active_routes": "Active Routes",
+        "from_yesterday": "from yesterday",
+        "today": "Today",
+        "transactions_by_payment": "Transactions by Payment Method",
+        "revenue_by_route": "Revenue by Route",
+        "recent_transactions": "Recent Transactions",
+        "bar_chart": "Bar Chart",
+        "pie_chart": "Pie Chart"
+    },
+    "filters": {
+        "label": "Filters:",
+        "all_companies": "All Companies",
+        "all_routes": "All Routes",
+        "all_provinces": "All Provinces",
+        "date": {
+            "today": "Today",
+            "yesterday": "Yesterday",
+            "last_7_days": "Last 7 Days",
+            "last_30_days": "Last 30 Days",
+            "this_month": "This Month",
+            "last_month": "Last Month"
+        }
+    },
+    "table": {
+        "id": "ID",
+        "route": "Route",
+        "passengers": "Passengers",
+        "revenue": "Revenue",
+        "time": "Time",
+        "status": "Status",
+        "completed": "Completed",
+        "in_progress": "In Progress",
+        "scheduled": "Scheduled",
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "entries": "entries"
+    }
+}

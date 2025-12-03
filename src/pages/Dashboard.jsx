@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis,
 import { Users, Bus, Map, BarChart3, PieChart as PieChartIcon } from "lucide-react";
 import DashboardFilters from "../components/dashboard/DashboardFilters";
 import DataTable from "../components/dashboard/DataTable";
+import { useTranslation } from 'react-i18next';
 
 // Color scheme
 const primaryColor = "#1976D2";
@@ -34,6 +35,7 @@ const StatsCard = ({ title, value, change, changeType, icon: Icon, bgColor }) =>
 );
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [company, setCompany] = useState("all");
   const [dateRange, setDateRange] = useState("today");
   const [route, setRoute] = useState("all");
@@ -97,25 +99,25 @@ export default function Dashboard() {
 
   const stats = [
     {
-      title: "Total Passengers",
+      title: t('dashboard.total_passengers'),
       value: "420",
-      change: "+8.1% from yesterday",
+      change: `+8.1% ${t('dashboard.from_yesterday')}`,
       changeType: "positive",
       icon: Users,
       bgColor: successColor,
     },
     {
-      title: "Total Revenue",
+      title: t('dashboard.total_revenue'),
       value: "$12,600",
-      change: "+12.3% from yesterday",
+      change: `+12.3% ${t('dashboard.from_yesterday')}`,
       changeType: "positive",
       icon: Bus,
       bgColor: primaryColor,
     },
     {
-      title: "Active Routes",
+      title: t('dashboard.active_routes'),
       value: "4",
-      change: "Today",
+      change: t('dashboard.today'),
       icon: Map,
       bgColor: "#AB47BC",
     },
@@ -138,13 +140,13 @@ export default function Dashboard() {
   ];
 
   const tableColumns = [
-    { header: "ID", accessor: "id" },
-    { header: "Route", accessor: "route" },
-    { header: "Passengers", accessor: "passengers" },
-    { header: "Revenue", accessor: "revenue" },
-    { header: "Time", accessor: "time" },
+    { header: t('table.id'), accessor: "id" },
+    { header: t('table.route'), accessor: "route" },
+    { header: t('table.passengers'), accessor: "passengers" },
+    { header: t('table.revenue'), accessor: "revenue" },
+    { header: t('table.time'), accessor: "time" },
     {
-      header: "Status",
+      header: t('table.status'),
       accessor: "status",
       render: (row) => (
         <span
@@ -155,7 +157,9 @@ export default function Dashboard() {
               : "bg-gray-100 text-gray-700"
             }`}
         >
-          {row.status}
+          {row.status === "Completed" ? t('table.completed') :
+            row.status === "In Progress" ? t('table.in_progress') :
+              t('table.scheduled')}
         </span>
       ),
     },
@@ -186,9 +190,9 @@ export default function Dashboard() {
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1">{t('dashboard.title')}</h1>
         <p className="text-sm text-gray-600 mb-4">
-          Today's overview of transactions and statistics
+          {t('dashboard.subtitle')}
         </p>
 
         {/* Filters */}
@@ -213,7 +217,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-lg p-6 shadow-sm mb-6" style={{ height: "420px" }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">
-            {chartType === "bar" ? "Revenue by Route" : "Transactions by Payment Method"}
+            {chartType === "bar" ? t('dashboard.revenue_by_route') : t('dashboard.transactions_by_payment')}
           </h2>
 
           {/* Chart Toggle Buttons */}
@@ -226,7 +230,7 @@ export default function Dashboard() {
                 }`}
             >
               <BarChart3 size={18} />
-              Bar Chart
+              {t('dashboard.bar_chart')}
             </button>
             <button
               onClick={() => setChartType("pie")}
@@ -236,7 +240,7 @@ export default function Dashboard() {
                 }`}
             >
               <PieChartIcon size={18} />
-              Pie Chart
+              {t('dashboard.pie_chart')}
             </button>
           </div>
         </div>
@@ -290,7 +294,7 @@ export default function Dashboard() {
 
       {/* Data Table */}
       <div className="mb-6">
-        <h2 className="text-lg font-bold mb-4">Recent Transactions</h2>
+        <h2 className="text-lg font-bold mb-4">{t('dashboard.recent_transactions')}</h2>
         <DataTable data={tableData} columns={tableColumns} itemsPerPage={5} />
       </div>
     </div>
