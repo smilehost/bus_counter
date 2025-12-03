@@ -11,7 +11,7 @@ const secondaryColor = "#64B5F6";
 const accentColor = "#FFA726";
 const successColor = "#66BB6A";
 
-const StatsCard = ({ title, value, change, changeType , bgColor }) => (
+const StatsCard = ({ title, value, change, changeType ,  icon: Icon , bgColor }) => (
   <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-3 h-full">
     <div
       className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0"
