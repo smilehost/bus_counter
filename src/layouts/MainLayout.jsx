@@ -23,7 +23,6 @@ const drawerWidth = 240;
 
 const primaryColor = "#1976D2";  // สีน้ำเงินโทนกลาง (Material Blue) ดูสุภาพ
 const secondaryColor = "#64B5F6"; // สีฟ้าที่สว่างขึ้นนิดเดียว (ไล่เฉดเนียนๆ ไม่กระโดด)
-const shadowColor = "rgba(25, 118, 210, 0.25)"; // เงาสีฟ้าเข้มจางๆ (ลดความทึบลง)
 
 const getRoleName = (roleId) => {
   switch (roleId) {
