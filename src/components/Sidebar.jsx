@@ -14,42 +14,38 @@ import {
   useTheme,
   useMediaQuery,
   Box,
-  Toolbar, // 💡 แก้ไข: ต้อง Import Toolbar
+  Toolbar,
 } from "@mui/material";
 
 // MUI Icons
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import { LayoutDashboard, Camera, Bus } from "lucide-react";
 
 const drawerWidth = 240;
 
 const menus = [
-  { label: "Dashboard", path: "/", icon: DashboardIcon, roles: [1, 2, 3] },
+  { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: [1, 2, 3] },
   {
     label: "Manage Camera",
     path: "/manage-camera",
-    icon: CameraAltIcon,
+    icon: Camera,
     roles: [1, 2],
   },
   {
     label: "Manage Bus Door",
     path: "/manage-busdoor",
-    icon: DirectionsBusIcon,
+    icon: Bus,
     roles: [1, 2],
   },
 ];
 
 export default function Sidebar({ role, open, onClose }) {
-  // 🎨 กำหนดชุดสีฟ้าแบบเรียบง่าย สบายตา (Modern Blue)
-  const primaryColor = "#1976D2"; // สีน้ำเงินโทนกลาง
-  const secondaryColor = "#64B5F6"; // สีฟ้าสว่างขึ้น (สำหรับ Gradient)
-  const shadowColor = "rgba(25, 118, 210, 0.25)"; // เงาสีฟ้าจางๆ
+  const primaryColor = "#1976D2";
+  const secondaryColor = "#64B5F6";
+  const shadowColor = "rgba(25, 118, 210, 0.25)";
 
   const location = useLocation();
   const safeRole = role ?? 0;
   const theme = useTheme();
-  // 💡 ตรวจสอบว่าหน้าจอเป็นขนาดเล็กกว่า md หรือไม่ (คือ Mobile)
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const filteredMenus = menus.filter((item) => item.roles.includes(safeRole));
@@ -58,25 +54,86 @@ export default function Sidebar({ role, open, onClose }) {
     <Box
       sx={{
         width: drawerWidth,
-        height: "100%",        // ✅ ให้เต็มความสูง
-        display: "flex",       // ✅ จัด layout แบบ flex
+        height: "100%",
+        display: "flex",
         flexDirection: "column",
-        overflowX: "hidden",   // ✅✅ บรรทัดนี้สำคัญที่สุด! ช่วยซ่อนแถบเลื่อนด้านล่าง
+        overflow: "hidden",
       }}
       role="presentation"
     >
-      <Toolbar>
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          Bus Counter
+      {/* Header (Logo) */}
+      <Toolbar
+        sx={{
+          minHeight: { xs: 56, sm: 64 },
+          px: { xs: 3.2, sm: 3.5 },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Box
+          sx={{
+            width: { xs: 28, sm: 32 },
+            height: { xs: 28, sm: 32 },
+            borderRadius: 2,
+            background: `linear-gradient(45deg, ${primaryColor} 30%, ${secondaryColor} 90%)`,
+            mr: { xs: 1, sm: 1.5 },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            fontWeight: "bold",
+            flexShrink: 0,
+          }}
+        />
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            color: "#333",
+            fontSize: { xs: "1rem", sm: "1.25rem" },
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          BusCounter
         </Typography>
       </Toolbar>
+
       <Divider />
-     <List sx={{ flexGrow: 1 }}>
+
+      {/* Menu List */}
+      <List
+        sx={{
+          flexGrow: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          px: { xs: 1, sm: 1 },
+          py: 1,
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "rgba(0,0,0,0.2)",
+            borderRadius: "3px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: "rgba(0,0,0,0.3)",
+          },
+        }}
+      >
         {filteredMenus.map((item) => {
           const isActive = location.pathname === item.path;
 
           return (
-            <ListItem key={item.path} disablePadding>
+            <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
                 component={RouterLink}
                 to={item.path}
@@ -84,54 +141,62 @@ export default function Sidebar({ role, open, onClose }) {
                 selected={isActive}
                 sx={{
                   borderRadius: "12px",
-                  mx: 1,
-                  my: 0.5,
-                  transition: "all 0.3s ease", // เพิ่ม transition ให้นุ่มนวล
-
-                  // 🎨 สีปกติ (ตอนยังไม่เลือก)
+                  minHeight: { xs: 44, sm: 48 },
+                  px: { xs: 1.5, sm: 2 },
+                  py: { xs: 1, sm: 1.25 },
+                  transition: "all 0.3s ease",
                   color: "black",
+
                   "&:hover": {
-                     bgcolor: "rgba(25, 118, 210, 0.08)", // ฟ้าจางๆ ตอน hover
-                     color: primaryColor,
-                     "& .MuiListItemIcon-root": {
-                        color: primaryColor,
-                     }
+                    bgcolor: "rgba(25, 118, 210, 0.08)",
+                    color: primaryColor,
+                    "& .MuiListItemIcon-root": {
+                      color: primaryColor,
+                    },
                   },
 
-                  // 🎨 ส่วน ICON
                   "& .MuiListItemIcon-root": {
-                    minWidth: "32px",
+                    minWidth: { xs: 36, sm: 40 },
                     color: isActive ? "white" : "black",
                     transition: "color 0.3s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   },
 
-                  // 🌟 ไฮไลท์ตอนเลือก (Active State) - ไล่สีฟ้า
                   "&.Mui-selected": {
-                    // ไล่สี Gradient แบบเฉียงๆ (สีฟ้าโทนเรียบ)
                     background: `linear-gradient(45deg, ${primaryColor} 30%, ${secondaryColor} 90%)`,
                     color: "white",
                     fontWeight: "bold",
-                    
-                    // เงาฟุ้งๆ สีฟ้า (Drop Shadow)
                     boxShadow: `0px 4px 12px ${shadowColor}`,
 
                     "&:hover": {
-                      // ตอนชี้เมาส์ย้ำ ให้สีเข้มขึ้นนิดนึง
                       background: `linear-gradient(45deg, ${primaryColor} 50%, ${secondaryColor} 100%)`,
                     },
                   },
                 }}
               >
-                <ListItemIcon>
+                <ListItemIcon
+                  sx={{
+                    "& svg": {
+                      width: { xs: 20, sm: 24 },
+                      height: { xs: 20, sm: 24 },
+                    },
+                  }}
+                >
                   <item.icon />
                 </ListItemIcon>
-                <ListItemText 
-                    primary={item.label} 
-                    primaryTypographyProps={{ 
-                        fontSize: '0.95rem', 
-                        fontWeight: isActive ? 'bold' : 'normal' ,
-                        noWrap: true // ✅ ป้องกันข้อความยาวเกินแล้วดันกล่องจนล้น
-                    }} 
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{
+                    fontSize: { xs: "0.875rem", sm: "0.95rem" },
+                    fontWeight: isActive ? "bold" : "normal",
+                    noWrap: true,
+                    sx: {
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    },
+                  }}
                 />
               </ListItemButton>
             </ListItem>
@@ -139,46 +204,52 @@ export default function Sidebar({ role, open, onClose }) {
         })}
       </List>
       <Divider />
+      
     </Box>
   );
 
   return (
     <Box
       component="nav"
-      sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+      sx={{
+        width: { md: drawerWidth },
+        flexShrink: { md: 0 },
+      }}
     >
-      {/* 1. Mobile Drawer (Temporary - เปิด/ปิดได้) */}
+      {/* Mobile Drawer (Temporary) */}
       <Drawer
-        variant="temporary" // 💡 โหมดเปิด/ปิดได้
+        variant="temporary"
         open={open}
         onClose={onClose}
         ModalProps={{
           keepMounted: true,
         }}
         sx={{
-          display: { xs: "block", md: "none" }, // 💡 แสดงเฉพาะจอเล็ก (xs)
+          display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: drawerWidth,
-            overflowX: "hidden", // ✅ กันเหนียวที่ตัว Drawer ด้วย
+            overflow: "hidden",
           },
         }}
       >
         {drawerContent}
       </Drawer>
 
-      {/* 2. Desktop Drawer (Permanent - เปิดอยู่ตลอด) */}
+      {/* Desktop Drawer (Permanent) */}
       <Drawer
-        variant="permanent" // 💡 โหมดเปิดอยู่ตลอด
+        variant="permanent"
         sx={{
-          display: { xs: "none", md: "block" }, // 💡 แสดงเฉพาะจอใหญ่ (md ขึ้นไป)
+          display: { xs: "none", md: "block" },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: drawerWidth,
-            overflowX: "hidden", // ✅ กันเหนียวที่ตัว Drawer ด้วย
+            overflow: "hidden",
+            borderRight: "none",
+            boxShadow: "4px 0px 20px rgba(0, 0, 0, 0.08)",
           },
         }}
-        open // ไม่จำเป็นต้องใช้ prop นี้ แต่ใส่ไว้เพื่อความชัดเจนว่าเปิดอยู่เสมอ
+        open
       >
         {drawerContent}
       </Drawer>
