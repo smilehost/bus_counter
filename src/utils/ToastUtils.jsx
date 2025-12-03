@@ -1,16 +1,21 @@
 import { useSnackbar } from "notistack";
-import React from "react";
+import { useEffect } from "react"; // ✅ 1. เพิ่ม useEffect
 
-// เก็บ function enqueueSnackbar ไว้ในตัวแปรธรรมดา
 let useSnackbarRef;
 
-// Component นี้มีหน้าที่แค่ "ขโมย" hook มาเก็บไว้ในตัวแปรข้างบน
 export const SnackbarUtilsConfigurator = () => {
-  useSnackbarRef = useSnackbar();
+  const snackbar = useSnackbar();
+
+  // ✅ 2. ย้ายการกำหนดค่ามาไว้ใน useEffect (แก้ตัวแดง Cannot reassign...)
+  useEffect(() => {
+    useSnackbarRef = snackbar;
+  }, [snackbar]);
+
   return null;
 };
 
-// Export object นี้ออกไปใช้งาน (แทนการใช้ triggerToast เดิม)
+// ✅ 3. ใส่บรรทัดนี้เพื่อปิดการเตือนเรื่อง Fast Refresh
+// eslint-disable-next-line react-refresh/only-export-components
 export const toast = {
   success(msg, options = {}) {
     this.toast(msg, { ...options, variant: "success" });
@@ -28,7 +33,8 @@ export const toast = {
     if (useSnackbarRef) {
       useSnackbarRef.enqueueSnackbar(msg, options);
     } else {
-      console.warn("SnackbarUtils not initialized yet.");
+      // ถ้ายังไม่พร้อม ให้เก็บลง console หรือรอ retry (optional)
+      console.warn("Toast not ready yet, message:", msg);
     }
   },
 };
