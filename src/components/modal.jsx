@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,24 +9,277 @@ import {
   Typography,
   Box,
   Slide,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
-import { X } from "lucide-react"; // ใช้ไอคอนจาก Lucide
+import { X, Calendar } from "lucide-react";
 
-// เอฟเฟกต์เลื่อนขึ้นตอนเปิด (Transition)
+// Transition Effect
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function modal({
-  open, // (Boolean) เปิดหรือปิด
-  onClose, // (Func) ฟังก์ชันปิด Popup
-  title, // (String) หัวข้อ
-  children, // (Node) เนื้อหาข้างใน (Input หรือ Text)
-  confirmText, // (String) ข้อความปุ่มยืนยัน (เช่น "บันทึก", "ลบ")
-  onConfirm, // (Func) ฟังก์ชันเมื่อกดปุ่มยืนยัน
-  variant = "info", // (String) รูปแบบสี: "info" (สีฟ้า), "danger" (สีแดง)
+// ============================================
+// Input Components สำหรับแต่ละ Type
+// ============================================
+
+const TextInputWithLanguage = ({ value, onChange, label, language = "EN" }) => {
+  // Regular expressions สำหรับแต่ละภาษา
+  const languagePatterns = {
+    TH: /^[\u0E00-\u0E7F\s]*$/, // ภาษาไทย + ช่องว่าง
+    EN: /^[a-zA-Z\s]*$/,         // ภาษาอังกฤษ + ช่องว่าง
+  };
+
+  const handleInputChange = (e) => {
+    const inputValue = e.target.value;
+    const pattern = languagePatterns[language] || /^.*$/; // Default: allow all
+
+    // ตรวจสอบว่าตรงกับภาษาที่กำหนดหรือไม่
+    if (pattern.test(inputValue)) {
+      onChange(inputValue);
+    }
+    // ถ้าไม่ตรง ไม่ทำอะไร (ป้องกันการพิมพ์)
+  };
+
+  const placeholders = {
+    TH: "พิมพ์ภาษาไทยเท่านั้น",
+    EN: "Type in English only",
+  };
+
+  return (
+    <div>
+      <label className="block text-xs text-gray-600 mb-1">
+        {label} <span className="text-blue-500">({language})</span>
+      </label>
+      <input
+        type="text"
+        value={value}
+        onChange={handleInputChange}
+        placeholder={placeholders[language] || `Enter ${label} (${language})`}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+      />
+    </div>
+  );
+};
+
+// 2. Disabled Input (ป้องกันการแก้ไข)
+const DisabledInput = ({ value, label }) => {
+  return (
+    <Box>
+      <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+        {label}
+      </Typography>
+      <TextField
+        fullWidth
+        value={value}
+        disabled
+        variant="outlined"
+        size="small"
+        sx={{
+          borderRadius: "8px",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "#9ca3af",
+            cursor: "not-allowed",
+          },
+        }}
+      />
+    </Box>
+  );
+};
+
+// 3. Calendar Input
+const CalendarInput = ({ value, onChange, label }) => {
+  return (
+    <Box>
+      <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+        {label}
+      </Typography>
+      <TextField
+        fullWidth
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        variant="outlined"
+        size="small"
+        InputProps={{
+          endAdornment: <Calendar size={18} color="#9ca3af" />,
+        }}
+        sx={{ borderRadius: "8px" }}
+      />
+    </Box>
+  );
+};
+
+// 4. Textarea
+const TextareaInput = ({ value, onChange, label, rows = 4, maxLength }) => {
+  return (
+    <Box>
+      <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+        {label}
+        {maxLength && (
+          <span style={{ float: "right", color: "#9ca3af" }}>
+            {value?.length || 0}/{maxLength}
+          </span>
+        )}
+      </Typography>
+      <TextField
+        fullWidth
+        multiline
+        rows={rows}
+        value={value}
+        onChange={(e) => {
+          const newValue = e.target.value;
+          if (!maxLength || newValue.length <= maxLength) {
+            onChange(newValue);
+          }
+        }}
+        placeholder={`Enter ${label}...`}
+        variant="outlined"
+        sx={{ borderRadius: "8px" }}
+      />
+    </Box>
+  );
+};
+
+// 5. Number Input (ฐาน 10, ห้ามติดลบ, จำกัดค่าได้)
+const NumberInput = ({ value, onChange, label, min = 0, max, step = 1 }) => {
+  const handleChange = (e) => {
+    const inputValue = e.target.value;
+
+    // อนุญาตเฉพาะตัวเลขฐาน 10
+    if (inputValue === "" || /^\d+$/.test(inputValue)) {
+      const numValue = inputValue === "" ? "" : parseInt(inputValue, 10);
+
+      // ตรวจสอบ min และ max
+      if (numValue === "" || (numValue >= min && (!max || numValue <= max))) {
+        onChange(numValue);
+      }
+    }
+  };
+
+  return (
+    <Box>
+      <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+        {label} {max && `(Max: ${max})`}
+      </Typography>
+      <TextField
+        fullWidth
+        type="text"
+        value={value}
+        onChange={handleChange}
+        placeholder={`Enter ${label}`}
+        variant="outlined"
+        size="small"
+        inputProps={{
+          inputMode: "numeric",
+          pattern: "[0-9]*",
+          min,
+          max,
+          step,
+        }}
+        sx={{ borderRadius: "8px" }}
+      />
+    </Box>
+  );
+};
+
+// ============================================
+// Main Modal Component
+// ============================================
+export default function ReusableModal({
+  open,
+  onClose,
+  title,
+  fields = [], // Array of field configs
+  confirmText = "Confirm",
+  onConfirm,
+  variant = "info",
 }) {
-  // กำหนดสีปุ่มตาม Variant
+  const [formData, setFormData] = useState({});
+
+  // Update field value
+  const handleFieldChange = (fieldName, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
+  // Handle confirm
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm(formData);
+    }
+  };
+
+  // Render input based on type
+  const renderField = (field) => {
+    const value = formData[field.name] || field.defaultValue || "";
+
+    switch (field.type) {
+      case "text-lang":
+        return (
+          <TextInputWithLanguage
+            key={field.name}
+            label={field.label}
+            value={value}
+            onChange={(val) => handleFieldChange(field.name, val)}
+            language={field.language} // เปลี่ยนจาก languages เป็น languag
+          />
+        );
+
+      case "disabled":
+        return (
+          <DisabledInput
+            key={field.name}
+            label={field.label}
+            value={field.value}
+          />
+        );
+
+      case "calendar":
+        return (
+          <CalendarInput
+            key={field.name}
+            label={field.label}
+            value={value}
+            onChange={(val) => handleFieldChange(field.name, val)}
+          />
+        );
+
+      case "textarea":
+        return (
+          <TextareaInput
+            key={field.name}
+            label={field.label}
+            value={value}
+            onChange={(val) => handleFieldChange(field.name, val)}
+            rows={field.rows}
+            maxLength={field.maxLength}
+          />
+        );
+
+      case "number":
+        return (
+          <NumberInput
+            key={field.name}
+            label={field.label}
+            value={value}
+            onChange={(val) => handleFieldChange(field.name, val)}
+            min={field.min}
+            max={field.max}
+            step={field.step}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
   const isDanger = variant === "danger";
   const mainColor = isDanger ? "#d32f2f" : "#1976D2";
 
@@ -36,38 +289,40 @@ export default function modal({
       TransitionComponent={Transition}
       keepMounted
       onClose={onClose}
-      aria-describedby="alert-dialog-slide-description"
-      // ปรับแต่งความกว้างและความมน
       PaperProps={{
         sx: {
           borderRadius: "16px",
           width: "100%",
-          maxWidth: "450px", // ความกว้างสูงสุด
+          maxWidth: "500px",
           padding: 1,
         },
       }}
     >
-      {/* --- ส่วนหัว (Title) --- */}
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-        <Typography 
-            variant="h6" 
-            component="div"  // ✅✅ เพิ่มบรรทัดนี้ครับ!
-            sx={{ fontWeight: 600, color: "#374151" }}
-        >
+      {/* Header */}
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          pb: 1,
+        }}
+      >
+        <Typography variant="h6" component="div" sx={{ fontWeight: 600, color: "#374151" }}>
           {title}
         </Typography>
-        {/* ปุ่มกากบาทปิดมุมขวา */}
         <IconButton onClick={onClose} size="small" sx={{ color: "#9ca3af" }}>
           <X size={20} />
         </IconButton>
       </DialogTitle>
 
-      {/* --- ส่วนเนื้อหา (Content) --- */}
+      {/* Content */}
       <DialogContent>
-        <Box sx={{ color: "#4b5563", mt: 1 }}>{children}</Box>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, mt: 1 }}>
+          {fields.map((field) => renderField(field))}
+        </Box>
       </DialogContent>
 
-      {/* --- ส่วนปุ่มกด (Actions) --- */}
+      {/* Actions */}
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button
           onClick={onClose}
@@ -82,10 +337,9 @@ export default function modal({
           Cancel
         </Button>
 
-        {/* ปุ่มยืนยัน (จะแสดงก็ต่อเมื่อมีการส่ง onConfirm มา) */}
         {onConfirm && (
           <Button
-            onClick={onConfirm}
+            onClick={handleConfirm}
             variant="contained"
             sx={{
               bgcolor: mainColor,
@@ -99,7 +353,7 @@ export default function modal({
               },
             }}
           >
-            {confirmText || "Confirm"}
+            {confirmText}
           </Button>
         )}
       </DialogActions>
