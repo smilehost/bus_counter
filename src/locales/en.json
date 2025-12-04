@@ -28,14 +28,31 @@
         "all_companies": "All Companies",
         "all_routes": "All Routes",
         "all_provinces": "All Provinces",
+        "company_label": "Company",
+        "date_range_label": "Date Range",
+        "start_date_label": "Start Date",
+        "end_date_label": "End Date",
+        "route_label": "Route",
+        "select_start_hint": "Select start date and time",
+        "date_format_hint": "Format: DD/MM/YYYY",
+        "select_end_hint": "Select end date and time",
+        "specify_time": "Specify Time",
         "date": {
+            "all_date": "All Date",
             "today": "Today",
             "yesterday": "Yesterday",
             "last_7_days": "Last 7 Days",
             "last_30_days": "Last 30 Days",
             "this_month": "This Month",
-            "last_month": "Last Month"
-        }
+            "last_month": "Last Month",
+            "custom": "Custom"
+        },
+        "from": "From",
+        "to": "To",
+        "view": "View:",
+        "hourly": "Hourly",
+        "summary": "Summary",
+        "date_placeholder": "YYYY-MM-DD or DD/MM/YYYY"
     },
     "table": {
         "id": "ID",
@@ -51,5 +68,16 @@
         "to": "to",
         "of": "of",
         "entries": "entries"
+    },
+    "companies": {
+        "company_a": "Company A",
+        "company_b": "Company B",
+        "company_c": "Company C"
+    },
+    "routes": {
+        "route_a": "Route A",
+        "route_b": "Route B",
+        "route_c": "Route C",
+        "route_d": "Route D"
     }
 }

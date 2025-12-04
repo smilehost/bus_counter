@@ -28,14 +28,31 @@
         "all_companies": "ทุกบริษัท",
         "all_routes": "ทุกเส้นทาง",
         "all_provinces": "ทุกจังหวัด",
+        "company_label": "บริษัท",
+        "date_range_label": "ช่วงวันที่",
+        "start_date_label": "วันที่เริ่มต้น",
+        "end_date_label": "วันที่สิ้นสุด",
+        "route_label": "เส้นทาง",
+        "select_start_hint": "เลือกวันที่และเวลาที่เริ่มต้น",
+        "date_format_hint": "รูปแบบ: วว/ดด/ปปปป",
+        "select_end_hint": "เลือกวันที่และเวลาที่สิ้นสุด",
+        "specify_time": "ระบุเวลา",
         "date": {
+            "all_date": "ทุกวันที่",
             "today": "วันนี้",
             "yesterday": "เมื่อวาน",
             "last_7_days": "7 วันย้อนหลัง",
             "last_30_days": "30 วันย้อนหลัง",
             "this_month": "เดือนนี้",
-            "last_month": "เดือนที่แล้ว"
-        }
+            "last_month": "เดือนที่แล้ว",
+            "custom": "กำหนดเอง"
+        },
+        "from": "จาก",
+        "to": "ถึง",
+        "view": "มุมมอง:",
+        "hourly": "รายชั่วโมง",
+        "summary": "ภาพรวม",
+        "date_placeholder": "ปปปป-ดด-วว หรือ วว/ดด/ปปปป"
     },
     "table": {
         "id": "รหัส",
@@ -51,5 +68,16 @@
         "to": "ถึง",
         "of": "จาก",
         "entries": "รายการ"
+    },
+    "companies": {
+        "company_a": "บริษัท A",
+        "company_b": "บริษัท B",
+        "company_c": "บริษัท C"
+    },
+    "routes": {
+        "route_a": "เส้นทาง A",
+        "route_b": "เส้นทาง B",
+        "route_c": "เส้นทาง C",
+        "route_d": "เส้นทาง D"
     }
 }
