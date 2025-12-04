@@ -32,6 +32,7 @@
         "date_range_label": "Date Range",
         "start_date_label": "Start Date",
         "end_date_label": "End Date",
+        "select_date": "Select Date",
         "route_label": "Route",
         "select_start_hint": "Select start date and time",
         "date_format_hint": "Format: DD/MM/YYYY",
@@ -45,6 +46,7 @@
             "last_30_days": "Last 30 Days",
             "this_month": "This Month",
             "last_month": "Last Month",
+            "single_day": "Single Day",
             "custom": "Custom"
         },
         "from": "From",

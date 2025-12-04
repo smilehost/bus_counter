@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 
 // MUI Icons
-import { LayoutDashboard, Camera, Bus } from "lucide-react";
+import { LayoutDashboard, Camera, Bus, LogOut } from "lucide-react";
 
 const drawerWidth = 240;
 
@@ -205,8 +205,58 @@ export default function Sidebar({ role, open, onClose }) {
           );
         })}
       </List>
+
       <Divider />
 
+      <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
+        <ListItemButton
+          sx={{
+            borderRadius: "12px",
+            minHeight: { xs: 44, sm: 48 },
+            px: { xs: 2, sm: 3 },
+            py: { xs: 1, sm: 1.25 },
+            width: "fit-content",
+            display: "flex",
+            alignItems: "center", // เพิ่มบรรทัดนี้
+            transition: "all 0.3s ease",
+            color: "#ef4444",
+            "&:hover": {
+              bgcolor: "rgba(239, 68, 68, 0.08)",
+              color: "#dc2626",
+              "& .MuiListItemIcon-root": {
+                color: "#dc2626",
+              },
+            },
+            "& .MuiListItemIcon-root": {
+              minWidth: "auto",
+              mr: 1.5,
+              color: "#ef4444",
+              transition: "color 0.3s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+          }}
+        >
+          <ListItemIcon
+            sx={{
+              "& svg": {
+                width: { xs: 20, sm: 24 },
+                height: { xs: 20, sm: 24 },
+              },
+            }}
+          >
+            <LogOut />
+          </ListItemIcon>
+          <ListItemText
+            primary={t('sidebar.logout')}
+            primaryTypographyProps={{
+              fontSize: { xs: "0.875rem", sm: "0.95rem" },
+              fontWeight: "medium",
+            }}
+          />
+        </ListItemButton>
+      </Box>
     </Box>
   );
 

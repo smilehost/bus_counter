@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { Filter, Calendar, Clock, BarChart2 } from "lucide-react";
+import { Filter, Clock, BarChart2 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import ThaiDatePicker from './ThaiDatePicker';
 
 export default function DashboardFilters({
     company,
@@ -21,23 +22,23 @@ export default function DashboardFilters({
     // State for manual input
     const [manualStartDate, setManualStartDate] = useState('');
     const [manualEndDate, setManualEndDate] = useState('');
-    const [manualStartTime, setManualStartTime] = useState('');
-    const [manualEndTime, setManualEndTime] = useState('');
+
+    // Time specific states
+    const [startHour, setStartHour] = useState('');
+    const [startMinute, setStartMinute] = useState('');
+    const [endHour, setEndHour] = useState('');
+    const [endMinute, setEndMinute] = useState('');
 
     const showDatePicker = dateRange === 'custom';
+    const showSingleDatePicker = dateRange === 'single_day';
     const showTimePicker = ['today', 'yesterday'].includes(dateRange);
 
-    const getTimeFromDateString = useCallback((dateString) => {
-        if (!dateString) return '';
-
-        if (dateString.includes('T')) {
-            const timePart = dateString.split('T')[1];
-            if (timePart && timePart.length >= 5) {
-                return timePart.substring(0, 5);
-            }
-        }
-
-        return '';
+    const getTimeParts = useCallback((dateString) => {
+        if (!dateString || !dateString.includes('T')) return { h: '', m: '' };
+        const timePart = dateString.split('T')[1];
+        if (!timePart) return { h: '', m: '' };
+        const [h, m] = timePart.split(':');
+        return { h: h || '', m: m || '' };
     }, []);
 
     const getBaseDate = useCallback((rangeType) => {
@@ -67,54 +68,79 @@ export default function DashboardFilters({
         return '';
     }, [customEndDate, manualEndDate]);
 
-    const startTimeInput = useMemo(() => {
-        if (manualStartTime) return manualStartTime;
-        return getTimeFromDateString(customStartDate);
-    }, [customStartDate, manualStartTime, getTimeFromDateString]);
+    // Derived time inputs
+    const startHourInput = useMemo(() => {
+        if (startHour !== '') return startHour;
+        return getTimeParts(customStartDate).h;
+    }, [startHour, customStartDate, getTimeParts]);
 
-    const endTimeInput = useMemo(() => {
-        if (manualEndTime) return manualEndTime;
-        return getTimeFromDateString(customEndDate);
-    }, [customEndDate, manualEndTime, getTimeFromDateString]);
+    const startMinuteInput = useMemo(() => {
+        if (startMinute !== '') return startMinute;
+        return getTimeParts(customStartDate).m;
+    }, [startMinute, customStartDate, getTimeParts]);
 
-    const handleManualTimeInput = (type, inputValue) => {
-        let cleaned = inputValue.replace(/[^\d:]/g, '');
+    const endHourInput = useMemo(() => {
+        if (endHour !== '') return endHour;
+        return getTimeParts(customEndDate).h;
+    }, [endHour, customEndDate, getTimeParts]);
 
-        let hours = '';
-        let minutes = '00';
+    const endMinuteInput = useMemo(() => {
+        if (endMinute !== '') return endMinute;
+        return getTimeParts(customEndDate).m;
+    }, [endMinute, customEndDate, getTimeParts]);
 
-        if (cleaned.includes(':')) {
-            const parts = cleaned.split(':');
-            hours = parts[0].padStart(2, '0');
-            minutes = (parts[1] || '00').padStart(2, '0');
-        } else if (cleaned.length >= 3) {
-            hours = cleaned.substring(0, 2).padStart(2, '0');
-            minutes = cleaned.substring(2, 4).padStart(2, '0');
-        } else if (cleaned.length > 0) {
-            hours = cleaned.padStart(2, '0');
-            minutes = '00';
+    const handleTimeChange = (type, part, value) => {
+        const cleaned = value.replace(/[^\d]/g, '');
+
+        if (type === 'start') {
+            if (part === 'hour') setStartHour(cleaned);
+            else setStartMinute(cleaned);
+        } else {
+            if (part === 'hour') setEndHour(cleaned);
+            else setEndMinute(cleaned);
         }
+    };
 
-        const h = parseInt(hours);
-        const m = parseInt(minutes);
+    const handleTimeBlur = (type, part, value) => {
+        let cleaned = value.replace(/[^\d]/g, '');
+        let intVal = parseInt(cleaned);
 
-        if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
-            const formattedTime = `${hours}:${minutes}`;
-
+        if (isNaN(intVal)) {
             if (type === 'start') {
-                setManualStartTime(formattedTime);
+                if (part === 'hour') setStartHour('');
+                else setStartMinute('');
             } else {
-                setManualEndTime(formattedTime);
+                if (part === 'hour') setEndHour('');
+                else setEndMinute('');
             }
-
-            const baseDate = getBaseDate(dateRange);
-            const finalDateTime = `${baseDate}T${formattedTime}`;
-            onCustomDateChange(type, finalDateTime);
-
-            return true;
+            return;
         }
 
-        return false;
+        if (part === 'hour') {
+            if (intVal < 0) intVal = 0;
+            if (intVal > 23) intVal = 23;
+        } else {
+            if (intVal < 0) intVal = 0;
+            if (intVal > 59) intVal = 59;
+        }
+
+        const formatted = String(intVal).padStart(2, '0');
+
+        if (type === 'start') {
+            if (part === 'hour') setStartHour(formatted);
+            else setStartMinute(formatted);
+        } else {
+            if (part === 'hour') setEndHour(formatted);
+            else setEndMinute(formatted);
+        }
+
+        const currentParts = type === 'start' ? getTimeParts(customStartDate) : getTimeParts(customEndDate);
+        const h = part === 'hour' ? formatted : (currentParts.h || '00');
+        const m = part === 'minute' ? formatted : (currentParts.m || '00');
+
+        const baseDate = getBaseDate(dateRange);
+        const finalDateTime = `${baseDate}T${h}:${m}`;
+        onCustomDateChange(type, finalDateTime);
     };
 
     const handleDateRangeChange = (e) => {
@@ -130,9 +156,17 @@ export default function DashboardFilters({
 
             setManualStartDate('');
             setManualEndDate('');
-            setManualStartTime('');
-            setManualEndTime('');
+            setStartHour('');
+            setStartMinute('');
+            setEndHour('');
+            setEndMinute('');
         } else if (val === 'custom') {
+            const today = getBaseDate('today');
+            onCustomDateChange('start', `${today}T00:00`);
+            onCustomDateChange('end', `${today}T23:59`);
+            setManualStartDate(today);
+            setManualEndDate(today);
+        } else if (val === 'single_day') {
             const today = getBaseDate('today');
             onCustomDateChange('start', `${today}T00:00`);
             onCustomDateChange('end', `${today}T23:59`);
@@ -151,49 +185,6 @@ export default function DashboardFilters({
         if (value && value.length === 10 && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
             const time = type === 'start' ? 'T00:00' : 'T23:59';
             onCustomDateChange(type, `${value}${time}`);
-        }
-    };
-
-    const parseManualDateInput = (type, inputValue) => {
-        let cleaned = inputValue.replace(/[^\d/-]/g, '');
-
-        const patterns = [
-            /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/,
-            /^(\d{1,2})(\d{2})(\d{4})$/
-        ];
-
-        for (let pattern of patterns) {
-            const match = cleaned.match(pattern);
-            if (match) {
-                const day = match[1].padStart(2, '0');
-                const month = match[2].padStart(2, '0');
-                const year = match[3];
-
-                const monthNum = parseInt(month);
-                const dayNum = parseInt(day);
-
-                if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31) {
-                    const formattedDate = `${year}-${month}-${day}`;
-                    const time = type === 'start' ? 'T00:00' : 'T23:59';
-
-                    if (type === 'start') {
-                        setManualStartDate(formattedDate);
-                    } else {
-                        setManualEndDate(formattedDate);
-                    }
-
-                    onCustomDateChange(type, `${formattedDate}${time}`);
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    };
-
-    const handleManualInputBlur = (type, value) => {
-        if (value && !value.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            parseManualDateInput(type, value);
         }
     };
 
@@ -233,6 +224,7 @@ export default function DashboardFilters({
                             <option value="last_30_days">{t('filters.date.last_30_days')}</option>
                             <option value="this_month">{t('filters.date.this_month')}</option>
                             <option value="last_month">{t('filters.date.last_month')}</option>
+                            <option value="single_day">{t('filters.date.single_day')}</option>
                             <option value="custom">{t('filters.date.custom')}</option>
                         </select>
                     </div>
@@ -264,16 +256,27 @@ export default function DashboardFilters({
                         {/* Start Time Picker */}
                         <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md bg-white shadow-sm hover:border-blue-400 transition-colors">
                             <span className="text-xs text-gray-500 font-bold uppercase">{t('filters.from')}</span>
-                            <input
-                                type="text"
-                                value={startTimeInput}
-                                onChange={(e) => {
-                                    setManualStartTime(e.target.value);
-                                }}
-                                onBlur={(e) => handleManualTimeInput('start', e.target.value)}
-                                placeholder="HH:MM"
-                                className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 min-w-[70px] text-center"
-                            />
+                            <div className="flex items-center gap-1">
+                                <input
+                                    type="text"
+                                    value={startHourInput}
+                                    onChange={(e) => handleTimeChange('start', 'hour', e.target.value)}
+                                    onBlur={(e) => handleTimeBlur('start', 'hour', e.target.value)}
+                                    placeholder="HH"
+                                    maxLength={2}
+                                    className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
+                                />
+                                <span className="text-gray-400">:</span>
+                                <input
+                                    type="text"
+                                    value={startMinuteInput}
+                                    onChange={(e) => handleTimeChange('start', 'minute', e.target.value)}
+                                    onBlur={(e) => handleTimeBlur('start', 'minute', e.target.value)}
+                                    placeholder="MM"
+                                    maxLength={2}
+                                    className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
+                                />
+                            </div>
                         </div>
 
                         <span className="text-gray-400 font-bold">→</span>
@@ -281,69 +284,67 @@ export default function DashboardFilters({
                         {/* End Time Picker */}
                         <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md bg-white shadow-sm hover:border-blue-400 transition-colors">
                             <span className="text-xs text-gray-500 font-bold uppercase">{t('filters.to')}</span>
-                            <input
-                                type="text"
-                                value={endTimeInput}
-                                onChange={(e) => {
-                                    setManualEndTime(e.target.value);
-                                }}
-                                onBlur={(e) => handleManualTimeInput('end', e.target.value)}
-                                placeholder="HH:MM"
-                                className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 min-w-[70px] text-center"
-                            />
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-px h-8 bg-gray-200 mx-2 hidden sm:block"></div>
-
-                        {/* Interval Selector */}
-                        <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md bg-white shadow-sm hover:border-blue-400 transition-colors ml-auto sm:ml-0">
-                            <BarChart2 size={16} className="text-gray-600" />
-                            <span className="text-xs text-gray-500 font-bold mr-1">{t('filters.view')}</span>
-                            <select
-                                value={interval}
-                                onChange={(e) => onIntervalChange(e.target.value)}
-                                className="text-sm font-medium text-gray-700 focus:outline-none bg-white cursor-pointer border-0 p-0"
-                            >
-                                <option value="hourly">{t('filters.hourly')}</option>
-                                <option value="summary">{t('filters.summary')}</option>
-                            </select>
+                            <div className="flex items-center gap-1">
+                                <input
+                                    type="text"
+                                    value={endHourInput}
+                                    onChange={(e) => handleTimeChange('end', 'hour', e.target.value)}
+                                    onBlur={(e) => handleTimeBlur('end', 'hour', e.target.value)}
+                                    placeholder="HH"
+                                    maxLength={2}
+                                    className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
+                                />
+                                <span className="text-gray-400">:</span>
+                                <input
+                                    type="text"
+                                    value={endMinuteInput}
+                                    onChange={(e) => handleTimeChange('end', 'minute', e.target.value)}
+                                    onBlur={(e) => handleTimeBlur('end', 'minute', e.target.value)}
+                                    placeholder="MM"
+                                    maxLength={2}
+                                    className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
+                                />
+                            </div>
                         </div>
                     </div>
                 )}
 
-                {/* Third Row - Custom Date Picker */}
+                {/* Third Row - Single Day Picker */}
+                {showSingleDatePicker && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg flex-wrap bg-gray-50 border border-gray-200">
+                        <ThaiDatePicker
+                            value={startDateInput}
+                            onChange={(value) => {
+                                handleDateInputChange('start', value);
+                                handleDateInputChange('end', value);
+                            }}
+                            min="2000-01-01"
+                            max="2099-12-31"
+                            label={t('filters.select_date')}
+                        />
+                    </div>
+                )}
+
+                {/* Fourth Row - Custom Date Range Picker */}
                 {showDatePicker && (
                     <div className="flex items-center gap-3 p-3 rounded-lg flex-wrap bg-gray-50 border border-gray-200">
-                        <div className="flex flex-col">
-                            <label className="text-xs font-semibold mb-1 px-1 text-gray-500">
-                                {t('filters.start_date_label')}
-                            </label>
-                            <input
-                                type="date"
-                                value={startDateInput}
-                                onChange={(e) => handleDateInputChange('start', e.target.value)}
-                                onBlur={(e) => handleManualInputBlur('start', e.target.value)}
-                                placeholder={t('filters.date_placeholder')}
-                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none min-w-[150px] cursor-pointer bg-white"
-                            />
-                        </div>
+                        <ThaiDatePicker
+                            value={startDateInput}
+                            onChange={(value) => handleDateInputChange('start', value)}
+                            min="2000-01-01"
+                            max="2099-12-31"
+                            label={t('filters.start_date_label')}
+                        />
 
-                        <span className="text-gray-400 mt-5">→</span>
+                        <span className="text-gray-400 mt-5 hidden sm:inline">→</span>
 
-                        <div className="flex flex-col">
-                            <label className="text-xs font-semibold mb-1 px-1 text-gray-500">
-                                {t('filters.end_date_label')}
-                            </label>
-                            <input
-                                type="date"
-                                value={endDateInput}
-                                onChange={(e) => handleDateInputChange('end', e.target.value)}
-                                onBlur={(e) => handleManualInputBlur('end', e.target.value)}
-                                placeholder={t('filters.date_placeholder')}
-                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none min-w-[150px] cursor-pointer bg-white"
-                            />
-                        </div>
+                        <ThaiDatePicker
+                            value={endDateInput}
+                            onChange={(value) => handleDateInputChange('end', value)}
+                            min="2000-01-01"
+                            max="2099-12-31"
+                            label={t('filters.end_date_label')}
+                        />
                     </div>
                 )}
             </div>

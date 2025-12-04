@@ -32,6 +32,7 @@
         "date_range_label": "ช่วงวันที่",
         "start_date_label": "วันที่เริ่มต้น",
         "end_date_label": "วันที่สิ้นสุด",
+        "select_date": "เลือกวันที่",
         "route_label": "เส้นทาง",
         "select_start_hint": "เลือกวันที่และเวลาที่เริ่มต้น",
         "date_format_hint": "รูปแบบ: วว/ดด/ปปปป",
@@ -45,6 +46,7 @@
             "last_30_days": "30 วันย้อนหลัง",
             "this_month": "เดือนนี้",
             "last_month": "เดือนที่แล้ว",
+            "single_day": "เลือกวันเดียว",
             "custom": "กำหนดเอง"
         },
         "from": "จาก",
