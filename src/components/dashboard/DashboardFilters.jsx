@@ -262,7 +262,7 @@ export default function DashboardFilters({
                                     value={startHourInput}
                                     onChange={(e) => handleTimeChange('start', 'hour', e.target.value)}
                                     onBlur={(e) => handleTimeBlur('start', 'hour', e.target.value)}
-                                    placeholder="HH"
+                                    placeholder={t('filters.hour_placeholder')}
                                     maxLength={2}
                                     className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
                                 />
@@ -272,7 +272,7 @@ export default function DashboardFilters({
                                     value={startMinuteInput}
                                     onChange={(e) => handleTimeChange('start', 'minute', e.target.value)}
                                     onBlur={(e) => handleTimeBlur('start', 'minute', e.target.value)}
-                                    placeholder="MM"
+                                    placeholder={t('filters.minute_placeholder')}
                                     maxLength={2}
                                     className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
                                 />
@@ -290,7 +290,7 @@ export default function DashboardFilters({
                                     value={endHourInput}
                                     onChange={(e) => handleTimeChange('end', 'hour', e.target.value)}
                                     onBlur={(e) => handleTimeBlur('end', 'hour', e.target.value)}
-                                    placeholder="HH"
+                                    placeholder={t('filters.hour_placeholder')}
                                     maxLength={2}
                                     className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
                                 />
@@ -300,7 +300,7 @@ export default function DashboardFilters({
                                     value={endMinuteInput}
                                     onChange={(e) => handleTimeChange('end', 'minute', e.target.value)}
                                     onBlur={(e) => handleTimeBlur('end', 'minute', e.target.value)}
-                                    placeholder="MM"
+                                    placeholder={t('filters.minute_placeholder')}
                                     maxLength={2}
                                     className="text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text bg-white border-0 p-1 w-[30px] text-center rounded"
                                 />

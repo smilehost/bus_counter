@@ -10,12 +10,9 @@ import {
   Box,
   Slide,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
 } from "@mui/material";
-import { X, Calendar } from "lucide-react";
+import { X } from "lucide-react";
+import ThaiDatePicker from './dashboard/ThaiDatePicker';
 
 // Transition Effect
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -90,26 +87,18 @@ const DisabledInput = ({ value, label }) => {
   );
 };
 
-// 3. Calendar Input
+// 3. Calendar Input - ใช้ ThaiDatePicker
 const CalendarInput = ({ value, onChange, label }) => {
   return (
-    <Box>
-      <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
-        {label}
-      </Typography>
-      <TextField
-        fullWidth
-        type="date"
+    <div>
+      <ThaiDatePicker
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        variant="outlined"
-        size="small"
-        InputProps={{
-          endAdornment: <Calendar size={18} color="#9ca3af" />,
-        }}
-        sx={{ borderRadius: "8px" }}
+        onChange={onChange}
+        min="2000-01-01"
+        max="2099-12-31"
+        label={label}
       />
-    </Box>
+    </div>
   );
 };
 
@@ -227,7 +216,7 @@ export default function ReusableModal({
             label={field.label}
             value={value}
             onChange={(val) => handleFieldChange(field.name, val)}
-            language={field.language} // เปลี่ยนจาก languages เป็น languag
+            language={field.language}
           />
         );
 

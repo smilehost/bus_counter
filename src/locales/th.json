@@ -54,7 +54,9 @@
         "view": "มุมมอง:",
         "hourly": "รายชั่วโมง",
         "summary": "ภาพรวม",
-        "date_placeholder": "ปปปป-ดด-วว หรือ วว/ดด/ปปปป"
+        "date_placeholder": "ปปปป-ดด-วว หรือ วว/ดด/ปปปป",
+        "hour_placeholder": "ชม",
+        "minute_placeholder": "นาที"
     },
     "table": {
         "id": "รหัส",

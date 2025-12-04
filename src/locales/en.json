@@ -54,7 +54,9 @@
         "view": "View:",
         "hourly": "Hourly",
         "summary": "Summary",
-        "date_placeholder": "YYYY-MM-DD or DD/MM/YYYY"
+        "date_placeholder": "YYYY-MM-DD or DD/MM/YYYY",
+        "hour_placeholder": "HH",
+        "minute_placeholder": "MM"
     },
     "table": {
         "id": "ID",
