@@ -5,6 +5,7 @@ import CustomButton from "../components/CustomButto";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import Trash from "@mui/icons-material/Autorenew";
 import Settings from "@mui/icons-material/Autorenew";
+import { convertDateFieldsToThai } from "../utils/dateUtils";
 
 export default function ManageBusDoor() {
   const [openModal, setOpenModal] = useState(false);
@@ -96,7 +97,11 @@ export default function ManageBusDoor() {
                 borderRadius: "8px",
               }}
             >
-              {JSON.stringify(formData, null, 2)}
+              {JSON.stringify(
+                convertDateFieldsToThai(formData, ['releaseDate']),
+                null,
+                2
+              )}
             </pre>
           </Box>
         )}
