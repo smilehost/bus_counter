@@ -4,8 +4,11 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import { useTranslation } from 'react-i18next';
 
 export default function CameraCard({ camera, onEdit, onDelete, onViewStats }) {
+    const { t } = useTranslation();
+
     const getStatusColor = (status) => {
         switch (status) {
             case "active":
@@ -22,11 +25,11 @@ export default function CameraCard({ camera, onEdit, onDelete, onViewStats }) {
     const getStatusLabel = (status) => {
         switch (status) {
             case "active":
-                return "Active";
+                return t('manage_camera.active');
             case "inactive":
-                return "Inactive";
+                return t('manage_camera.inactive');
             case "warning":
-                return "Warning";
+                return t('manage_camera.warning');
             default:
                 return "Unknown";
         }
@@ -87,7 +90,7 @@ export default function CameraCard({ camera, onEdit, onDelete, onViewStats }) {
             <Stack direction="row" spacing={2} sx={{ mb: 2, py: 2, borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
                 <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" color="text.secondary" display="block">
-                        Today's Count
+                        {t('manage_camera.today_count')}
                     </Typography>
                     <Typography variant="h6" fontWeight="bold">
                         {camera.todayCount}
@@ -95,7 +98,7 @@ export default function CameraCard({ camera, onEdit, onDelete, onViewStats }) {
                 </Box>
                 <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" color="text.secondary" display="block">
-                        Uptime
+                        {t('manage_camera.uptime')}
                     </Typography>
                     <Typography variant="h6" fontWeight="bold" color={camera.uptime >= 95 ? "success.main" : "warning.main"}>
                         {camera.uptime}%

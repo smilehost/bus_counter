@@ -28,6 +28,7 @@
         "all_companies": "ทุกบริษัท",
         "all_routes": "ทุกเส้นทาง",
         "all_provinces": "ทุกจังหวัด",
+        "all_status": "ทุกสถานะ",
         "company_label": "บริษัท",
         "date_range_label": "ช่วงวันที่",
         "start_date_label": "วันที่เริ่มต้น",
@@ -61,17 +62,22 @@
     "table": {
         "id": "รหัส",
         "route": "เส้นทาง",
+        "camera": "กล้อง",
         "passengers": "ผู้โดยสาร",
         "revenue": "รายได้",
         "time": "เวลา",
         "status": "สถานะ",
+        "company": "บริษัท",
+        "schedule": "ตารางเวลา",
+        "actions": "การดำเนินการ",
         "completed": "เสร็จสิ้น",
         "in_progress": "กำลังดำเนินการ",
         "scheduled": "กำหนดการ",
         "showing": "แสดง",
         "to": "ถึง",
         "of": "จาก",
-        "entries": "รายการ"
+        "entries": "รายการ",
+        "per_page": "ต่อหน้า"
     },
     "companies": {
         "company_a": "บริษัท A",
@@ -83,5 +89,28 @@
         "route_b": "เส้นทาง B",
         "route_c": "เส้นทาง C",
         "route_d": "เส้นทาง D"
+    },
+    "manage_camera": {
+        "title": "จัดการกล้อง",
+        "subtitle": "ดูและจัดการกล้องนับผู้โดยสาร",
+        "add_camera": "เพิ่มกล้อง",
+        "add_new_camera": "เพิ่มกล้องใหม่",
+        "search_placeholder": "ค้นหากล้อง...",
+        "no_cameras_found": "ไม่พบกล้อง",
+        "adjust_search": "ลองปรับคำค้นหาของคุณ",
+        "get_started": "เริ่มต้นด้วยการเพิ่มกล้องตัวแรกของคุณ",
+        "add_first_camera": "เพิ่มกล้องตัวแรกของคุณ",
+        "camera_name": "ชื่อกล้อง",
+        "location": "สถานที่",
+        "status": "สถานะ",
+        "ip_address": "ที่อยู่ IP",
+        "today_count": "นับวันนี้",
+        "uptime": "เวลาทำงาน",
+        "active": "ทำงานอยู่",
+        "inactive": "ไม่ทำงาน",
+        "warning": "เตือน",
+        "edit": "แก้ไข",
+        "delete": "ลบ",
+        "view_stats": "ดูสถิติ"
     }
 }

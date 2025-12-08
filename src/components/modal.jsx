@@ -264,6 +264,45 @@ export default function ReusableModal({
           />
         );
 
+      case "warning":
+        return (
+          <Box
+            key={field.name}
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: field.variant === "danger" ? "#FEE2E2" : "#FEF3C7",
+              border: `1px solid ${field.variant === "danger" ? "#FECACA" : "#FDE68A"}`,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: field.variant === "danger" ? "#991B1B" : "#92400E",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1,
+              }}
+            >
+              <span style={{ fontSize: "1.2rem" }}>{field.icon || "⚠️"}</span>
+              {field.message}
+            </Typography>
+          </Box>
+        );
+
+      case "info":
+        return (
+          <Box key={field.name} sx={{ py: 1 }}>
+            <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mb: 0.5 }}>
+              {field.label}
+            </Typography>
+            <Typography variant="body1" sx={{ color: "#374151", fontWeight: 500 }}>
+              {field.value}
+            </Typography>
+          </Box>
+        );
+
       default:
         return null;
     }

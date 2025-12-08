@@ -28,6 +28,7 @@
         "all_companies": "All Companies",
         "all_routes": "All Routes",
         "all_provinces": "All Provinces",
+        "all_status": "All Status",
         "company_label": "Company",
         "date_range_label": "Date Range",
         "start_date_label": "Start Date",
@@ -61,17 +62,22 @@
     "table": {
         "id": "ID",
         "route": "Route",
+        "camera": "Camera",
         "passengers": "Passengers",
         "revenue": "Revenue",
         "time": "Time",
         "status": "Status",
+        "company": "Company",
+        "schedule": "Schedule",
+        "actions": "Actions",
         "completed": "Completed",
         "in_progress": "In Progress",
         "scheduled": "Scheduled",
         "showing": "Showing",
         "to": "to",
         "of": "of",
-        "entries": "entries"
+        "entries": "entries",
+        "per_page": "per page"
     },
     "companies": {
         "company_a": "Company A",
@@ -83,5 +89,28 @@
         "route_b": "Route B",
         "route_c": "Route C",
         "route_d": "Route D"
+    },
+    "manage_camera": {
+        "title": "Manage Cameras",
+        "subtitle": "View and manage bus cameras",
+        "add_camera": "Add Camera",
+        "add_new_camera": "Add New Camera",
+        "search_placeholder": "Search cameras...",
+        "no_cameras_found": "No cameras found",
+        "adjust_search": "Try adjusting your search query",
+        "get_started": "Get started by adding your first camera",
+        "add_first_camera": "Add Your First Camera",
+        "camera_name": "Camera Name",
+        "location": "Location",
+        "status": "Status",
+        "ip_address": "IP Address",
+        "today_count": "Today's Count",
+        "uptime": "Uptime",
+        "active": "Active",
+        "inactive": "Inactive",
+        "warning": "Warning",
+        "edit": "Edit",
+        "delete": "Delete",
+        "view_stats": "View Stats"
     }
 }
