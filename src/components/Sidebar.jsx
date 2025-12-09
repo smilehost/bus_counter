@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 
 // MUI Icons
-import { LayoutDashboard, Camera, Bus, LogOut } from "lucide-react";
+import { LayoutDashboard, Camera, Bus, LogOut, LogIn, Home } from "lucide-react";
 
 const drawerWidth = 240;
 
@@ -36,6 +36,18 @@ const menus = [
     path: "/manage-busdoor",
     icon: Bus,
     roles: [1, 2],
+  },
+  {
+    label: "Login Page",
+    path: "/login",
+    icon: LogIn,
+    roles: [1, 2, 3],
+  },
+  {
+    label: "Landing Page",
+    path: "/landing",
+    icon: Home,
+    roles: [1, 2, 3],
   },
 ];
 
@@ -217,7 +229,7 @@ export default function Sidebar({ role, open, onClose }) {
             py: { xs: 1, sm: 1.25 },
             width: "fit-content",
             display: "flex",
-            alignItems: "center", // เพิ่มบรรทัดนี้
+            alignItems: "center",
             transition: "all 0.3s ease",
             color: "#ef4444",
             "&:hover": {
