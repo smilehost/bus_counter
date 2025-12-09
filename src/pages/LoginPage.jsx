@@ -31,7 +31,6 @@ export default function LoginPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 padding: "20px",
             }}
         >
@@ -46,48 +45,51 @@ export default function LoginPage() {
                     backdropFilter: "blur(10px)",
                 }}
             >
-                {/* Logo / Brand */}
-                <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                {/* Header with Gradient Background */}
+                <div
+                    style={{
+                        background: "linear-gradient(135deg, #1976D2 0%, #64B5F6 100%)",
+                        borderRadius: "24px 24px 0 0",
+                        margin: "-48px -40px 32px -40px",
+                        padding: "40px 40px 48px 40px",
+                        textAlign: "center",
+                    }}
+                >
+                    {/* Circular Ring Icon */}
                     <div
                         style={{
-                            width: "64px",
-                            height: "64px",
-                            background: "linear-gradient(45deg, #1976D2 30%, #64B5F6 90%)",
-                            borderRadius: "16px",
-                            display: "inline-flex",
+                            width: "80px",
+                            height: "80px",
+                            border: "4px solid rgba(255, 255, 255, 0.9)",
+                            borderRadius: "50%",
+                            margin: "0 auto 20px auto",
+                            display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            marginBottom: "16px",
-                            boxShadow: "0 10px 20px rgba(25, 118, 210, 0.3)",
                         }}
                     >
-                        <svg
-                            width="32"
-                            height="32"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <rect x="2" y="6" width="20" height="12" rx="2" />
-                            <circle cx="6" cy="18" r="2" />
-                            <circle cx="18" cy="18" r="2" />
-                        </svg>
+                        <div
+                            style={{
+                                width: "60px",
+                                height: "60px",
+                                border: "3px solid rgba(255, 255, 255, 0.5)",
+                                borderRadius: "50%",
+                            }}
+                        />
                     </div>
+
                     <h1
                         style={{
-                            fontSize: "28px",
+                            fontSize: "24px",
                             fontWeight: "700",
-                            color: "#1e293b",
+                            color: "white",
                             margin: "0 0 8px 0",
                         }}
                     >
-                        Bus Counter
+                        Bus Counter System
                     </h1>
-                    <p style={{ color: "#64748b", fontSize: "14px", margin: 0 }}>
-                        ระบบนับจำนวนผู้โดยสาร
+                    <p style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "14px", margin: 0 }}>
+                        Log in to access your account
                     </p>
                 </div>
 
@@ -104,14 +106,14 @@ export default function LoginPage() {
                                 marginBottom: "8px",
                             }}
                         >
-                            อีเมล
+                            Username
                         </label>
                         <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
+                            type="text"
+                            name="username"
+                            value={formData.username}
                             onChange={handleChange}
-                            placeholder="your@email.com"
+                            placeholder="Enter your username"
                             required
                             style={{
                                 width: "100%",
@@ -139,7 +141,7 @@ export default function LoginPage() {
                                 marginBottom: "8px",
                             }}
                         >
-                            รหัสผ่าน
+                            Password
                         </label>
                         <div style={{ position: "relative" }}>
                             <input
@@ -147,7 +149,7 @@ export default function LoginPage() {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                placeholder="••••••••"
+                                placeholder="Enter your password"
                                 required
                                 style={{
                                     width: "100%",
@@ -175,31 +177,27 @@ export default function LoginPage() {
                                     cursor: "pointer",
                                     color: "#64748b",
                                     padding: "4px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                 }}
                             >
-                                {showPassword ? "🙈" : "👁️"}
+                                {showPassword ? (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                        <line x1="1" y1="1" x2="23" y2="23" />
+                                    </svg>
+                                ) : (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                )}
                             </button>
                         </div>
                     </div>
 
-                    {/* Remember Me & Forgot */}
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: "24px",
-                            fontSize: "14px",
-                        }}
-                    >
-                        <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                            <input type="checkbox" style={{ width: "16px", height: "16px" }} />
-                            <span style={{ color: "#64748b" }}>จดจำฉัน</span>
-                        </label>
-                        <a href="#" style={{ color: "#1976D2", textDecoration: "none", fontWeight: "500" }}>
-                            ลืมรหัสผ่าน?
-                        </a>
-                    </div>
+
 
                     {/* Submit Button */}
                     <button
@@ -226,38 +224,9 @@ export default function LoginPage() {
                             e.target.style.boxShadow = "0 4px 15px rgba(25, 118, 210, 0.4)";
                         }}
                     >
-                        เข้าสู่ระบบ
+                        Sign In
                     </button>
                 </form>
-
-                {/* Divider */}
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        margin: "28px 0",
-                        gap: "16px",
-                    }}
-                >
-                    <div style={{ flex: 1, height: "1px", background: "#e2e8f0" }} />
-                    <span style={{ color: "#94a3b8", fontSize: "13px" }}>หรือ</span>
-                    <div style={{ flex: 1, height: "1px", background: "#e2e8f0" }} />
-                </div>
-
-                {/* Back to Landing */}
-                <div style={{ textAlign: "center" }}>
-                    <Link
-                        to="/landing"
-                        style={{
-                            color: "#64748b",
-                            fontSize: "14px",
-                            textDecoration: "none",
-                        }}
-                    >
-                        กลับไปหน้าหลัก{" "}
-                        <span style={{ color: "#1976D2", fontWeight: "500" }}>Landing Page →</span>
-                    </Link>
-                </div>
             </div>
         </div>
     );
