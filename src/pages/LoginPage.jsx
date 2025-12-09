@@ -30,6 +30,7 @@ export default function LoginPage() {
                 minHeight: "100vh",
                 display: "flex",
                 alignItems: "center",
+                background: "linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%)",
                 justifyContent: "center",
                 padding: "20px",
             }}
@@ -38,19 +39,17 @@ export default function LoginPage() {
                 style={{
                     width: "100%",
                     maxWidth: "420px",
-                    background: "rgba(255, 255, 255, 0.95)",
-                    borderRadius: "24px",
-                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                    padding: "48px 40px",
-                    backdropFilter: "blur(10px)",
+                    background: "#ffffff",
+                    borderRadius: "20px",
+                    boxShadow: "0 20px 60px rgba(25, 118, 210, 0.15), 0 8px 25px rgba(0, 0, 0, 0.08)",
+                    padding: "0",
+                    overflow: "hidden",
                 }}
             >
                 {/* Header with Gradient Background */}
                 <div
                     style={{
-                        background: "linear-gradient(135deg, #1976D2 0%, #64B5F6 100%)",
-                        borderRadius: "24px 24px 0 0",
-                        margin: "-48px -40px 32px -40px",
+                        background: "linear-gradient(135deg, #0D47A1 0%, #1976D2 50%, #42A5F5 100%)",
                         padding: "40px 40px 48px 40px",
                         textAlign: "center",
                     }}
@@ -86,7 +85,7 @@ export default function LoginPage() {
                             margin: "0 0 8px 0",
                         }}
                     >
-                        Bus Counter System
+                        Bussing Authen Center
                     </h1>
                     <p style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "14px", margin: 0 }}>
                         Log in to access your account
@@ -94,7 +93,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Login Form */}
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} style={{ padding: "32px 40px 40px 40px" }}>
                     {/* Email */}
                     <div style={{ marginBottom: "20px" }}>
                         <label
