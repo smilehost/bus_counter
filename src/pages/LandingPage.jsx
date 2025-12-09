@@ -1,80 +1,456 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+
+// ข้อมูลเว็บไซต์ในบริษัท
+const companyWebsites = [
+    {
+        id: 1,
+        name: "Bus Counter",
+        description: "ระบบนับจำนวนผู้โดยสารด้วย AI และกล้อง CCTV ติดตามข้อมูลแบบ Real-time",
+        icon: "🚌",
+        url: "/login",
+        color: "#1976D2",
+        gradient: "linear-gradient(135deg, #1976D2 0%, #64B5F6 100%)",
+        isInternal: true,
+    },
+    {
+        id: 2,
+        name: "Bus Ticket",
+        description: "ระบบจำหน่ายตั๋วรถโดยสารออนไลน์ สะดวก รวดเร็ว ปลอดภัย",
+        icon: "🎫",
+        url: "https://busticket.example.com",
+        color: "#7C3AED",
+        gradient: "linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)",
+        isInternal: false,
+    },
+    {
+        id: 3,
+        name: "Fleet Management",
+        description: "ระบบบริหารจัดการกองยานพาหนะ ติดตาม GPS และบำรุงรักษา",
+        icon: "🗺️",
+        url: "https://fleet.example.com",
+        color: "#059669",
+        gradient: "linear-gradient(135deg, #059669 0%, #34D399 100%)",
+        isInternal: false,
+    },
+    {
+        id: 4,
+        name: "Driver Portal",
+        description: "ระบบจัดการพนักงานขับรถ ตารางเวลา และประสิทธิภาพการทำงาน",
+        icon: "👨‍✈️",
+        url: "https://driver.example.com",
+        color: "#DC2626",
+        gradient: "linear-gradient(135deg, #DC2626 0%, #F87171 100%)",
+        isInternal: false,
+    },
+    {
+        id: 5,
+        name: "Revenue Analytics",
+        description: "ระบบวิเคราะห์รายได้และสถิติธุรกิจ รายงานครบถ้วน",
+        icon: "📊",
+        url: "https://analytics.example.com",
+        color: "#EA580C",
+        gradient: "linear-gradient(135deg, #EA580C 0%, #FB923C 100%)",
+        isInternal: false,
+    },
+    {
+        id: 6,
+        name: "Customer Support",
+        description: "ศูนย์บริการลูกค้า ติดต่อสอบถาม และแจ้งปัญหา",
+        icon: "📞",
+        url: "https://support.example.com",
+        color: "#0891B2",
+        gradient: "linear-gradient(135deg, #0891B2 0%, #22D3EE 100%)",
+        isInternal: false,
+    },
+];
+
+// Website Card Component
+function WebsiteCard({ website, onClick }) {
+    const [isHovered, setIsHovered] = useState(false);
+
+    return (
+        <div
+            onClick={() => onClick(website)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{
+                background: "#ffffff",
+                borderRadius: "12px",
+                padding: "32px",
+                minHeight: "180px",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: isHovered ? "translateY(-6px)" : "translateY(0)",
+                boxShadow: isHovered
+                    ? "0 16px 48px rgba(0, 0, 0, 0.12)"
+                    : "0 2px 16px rgba(0, 0, 0, 0.06)",
+                borderLeft: `4px solid ${website.color}`,
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
+            {/* Title */}
+            <h3
+                style={{
+                    fontSize: "22px",
+                    fontWeight: "700",
+                    margin: "0 0 12px 0",
+                    color: "#111827",
+                    letterSpacing: "-0.3px",
+                }}
+            >
+                {website.name}
+            </h3>
+
+            {/* Description */}
+            <p
+                style={{
+                    color: "#6b7280",
+                    lineHeight: "1.6",
+                    fontSize: "15px",
+                    margin: "0",
+                    flex: 1,
+                }}
+            >
+                {website.description}
+            </p>
+
+            {/* Divider */}
+            <div
+                style={{
+                    height: "1px",
+                    background: "#f3f4f6",
+                    margin: "20px 0 16px 0",
+                }}
+            />
+
+            {/* CTA Link */}
+            <div
+                style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: website.color,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    transition: "gap 0.2s ease",
+                }}
+            >
+                <span>เข้าใช้งาน</span>
+                <span
+                    style={{
+                        transition: "transform 0.2s ease",
+                        transform: isHovered ? "translateX(4px)" : "translateX(0)",
+                    }}
+                >
+                    →
+                </span>
+            </div>
+        </div>
+    );
+}
+
+// Modal Component
+function WebsiteModal({ website, onClose, onGo }) {
+    if (!website) return null;
+
+    return (
+        <div
+            onClick={onClose}
+            style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "rgba(0, 0, 0, 0.8)",
+                backdropFilter: "blur(8px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+                animation: "fadeIn 0.3s ease",
+            }}
+        >
+            <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                    background: "#ffffff",
+                    borderRadius: "16px",
+                    padding: "40px",
+                    maxWidth: "440px",
+                    width: "90%",
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
+                    animation: "slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    position: "relative",
+                }}
+            >
+                {/* Close button */}
+                <button
+                    onClick={onClose}
+                    style={{
+                        position: "absolute",
+                        top: "16px",
+                        right: "16px",
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "8px",
+                        border: "1px solid #e5e7eb",
+                        background: "#ffffff",
+                        color: "#6b7280",
+                        fontSize: "18px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.background = "#f3f4f6";
+                        e.target.style.color = "#1f2937";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.background = "#ffffff";
+                        e.target.style.color = "#6b7280";
+                    }}
+                >
+                    ×
+                </button>
+
+                {/* Title */}
+                <h2
+                    style={{
+                        fontSize: "24px",
+                        fontWeight: "700",
+                        marginBottom: "12px",
+                        color: "#1f2937",
+                    }}
+                >
+                    {website.name}
+                </h2>
+
+                {/* Description */}
+                <p
+                    style={{
+                        color: "#6b7280",
+                        lineHeight: "1.7",
+                        fontSize: "15px",
+                        marginBottom: "28px",
+                    }}
+                >
+                    {website.description}
+                </p>
+
+                {/* Buttons */}
+                <div style={{ display: "flex", gap: "12px" }}>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            flex: 1,
+                            padding: "14px 20px",
+                            background: "#ffffff",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "10px",
+                            color: "#374151",
+                            fontSize: "15px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = "#f9fafb";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = "#ffffff";
+                        }}
+                    >
+                        ยกเลิก
+                    </button>
+                    <button
+                        onClick={() => onGo(website)}
+                        style={{
+                            flex: 1,
+                            padding: "16px 24px",
+                            background: website.gradient,
+                            border: "none",
+                            borderRadius: "14px",
+                            color: "white",
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                            boxShadow: `0 8px 25px ${website.color}50`,
+                            transition: "all 0.3s",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.transform = "scale(1.02)";
+                            e.target.style.boxShadow = `0 12px 35px ${website.color}60`;
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = "scale(1)";
+                            e.target.style.boxShadow = `0 8px 25px ${website.color}50`;
+                        }}
+                    >
+                        <span>Go</span>
+                        <span style={{ fontSize: "18px" }}>→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function LandingPage() {
+    const [selectedWebsite, setSelectedWebsite] = useState(null);
+
+    const handleCardClick = (website) => {
+        setSelectedWebsite(website);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedWebsite(null);
+    };
+
+    const handleGo = (website) => {
+        if (website.isInternal) {
+            window.location.href = website.url;
+        } else {
+            window.open(website.url, "_blank");
+        }
+        setSelectedWebsite(null);
+    };
+
     return (
         <div
             style={{
                 minHeight: "100vh",
-                background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)",
+                background: "linear-gradient(135deg, #0052CC 0%, #1E88E5 50%, #00BCD4 100%)",
                 color: "white",
                 fontFamily: "'Inter', sans-serif",
+                position: "relative",
+                overflow: "hidden",
             }}
         >
+            {/* CSS Animations */}
+            <style>
+                {`
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes slideUp {
+                        from { 
+                            opacity: 0;
+                            transform: translateY(30px) scale(0.95);
+                        }
+                        to { 
+                            opacity: 1;
+                            transform: translateY(0) scale(1);
+                        }
+                    }
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0) rotate(0deg); }
+                        50% { transform: translateY(-20px) rotate(5deg); }
+                    }
+                    @keyframes pulse {
+                        0%, 100% { opacity: 0.4; transform: scale(1); }
+                        50% { opacity: 0.6; transform: scale(1.05); }
+                    }
+                    @keyframes shimmer {
+                        0% { background-position: -200% 0; }
+                        100% { background-position: 200% 0; }
+                    }
+                    @keyframes glow {
+                        0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.1); }
+                        50% { box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+                    }
+                `}
+            </style>
+
+            {/* Background decorations */}
+            <div
+                style={{
+                    position: "absolute",
+                    top: "10%",
+                    left: "5%",
+                    width: "400px",
+                    height: "400px",
+                    background: "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)",
+                    borderRadius: "50%",
+                    opacity: 0.05,
+                    filter: "blur(100px)",
+                    animation: "pulse 8s infinite",
+                    pointerEvents: "none",
+                }}
+            />
+            <div
+                style={{
+                    position: "absolute",
+                    bottom: "10%",
+                    right: "5%",
+                    width: "500px",
+                    height: "500px",
+                    background: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
+                    borderRadius: "50%",
+                    opacity: 0.05,
+                    filter: "blur(100px)",
+                    animation: "pulse 10s infinite 2s",
+                    pointerEvents: "none",
+                }}
+            />
+
             {/* Navigation */}
             <nav
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    padding: "20px 40px",
+                    padding: "20px 48px",
                     maxWidth: "1400px",
                     margin: "0 auto",
+                    position: "relative",
                 }}
             >
                 {/* Logo */}
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div
+                <div>
+                    <span
                         style={{
-                            width: "40px",
-                            height: "40px",
-                            background: "linear-gradient(45deg, #1976D2 30%, #64B5F6 90%)",
-                            borderRadius: "10px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            fontSize: "32px",
+                            fontWeight: "800",
+                            color: "#ffffff",
+                            letterSpacing: "-0.5px",
                         }}
                     >
-                        <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="2"
-                        >
-                            <rect x="2" y="6" width="20" height="12" rx="2" />
-                            <circle cx="6" cy="18" r="2" />
-                            <circle cx="18" cy="18" r="2" />
-                        </svg>
+                        Bussing Center
+                    </span>
+                    <div style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.7)", marginTop: "4px", letterSpacing: "0.5px" }}>
+                        Transportation Solutions
                     </div>
-                    <span style={{ fontSize: "22px", fontWeight: "700" }}>Bus Counter</span>
                 </div>
 
-                {/* Nav Links */}
-                <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-                    <a href="#features" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "15px" }}>
-                        คุณสมบัติ
-                    </a>
-                    <a href="#about" style={{ color: "#94a3b8", textDecoration: "none", fontSize: "15px" }}>
-                        เกี่ยวกับ
-                    </a>
-                    <Link
-                        to="/login"
+                {/* Contact */}
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                    <a
+                        href="#contact"
                         style={{
-                            padding: "10px 24px",
-                            background: "linear-gradient(45deg, #1976D2 30%, #64B5F6 90%)",
-                            borderRadius: "10px",
-                            color: "white",
+                            color: "#ffffff",
                             textDecoration: "none",
-                            fontWeight: "600",
-                            fontSize: "15px",
-                            boxShadow: "0 4px 15px rgba(25, 118, 210, 0.4)",
-                            transition: "all 0.3s",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            padding: "10px 20px",
+                            background: "rgba(255, 255, 255, 0.1)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255, 255, 255, 0.15)",
+                            backdropFilter: "blur(10px)",
+                            transition: "all 0.3s ease",
                         }}
                     >
-                        เข้าสู่ระบบ
-                    </Link>
+                        ติดต่อเรา
+                    </a>
                 </div>
             </nav>
 
@@ -83,189 +459,86 @@ export default function LandingPage() {
                 style={{
                     maxWidth: "1200px",
                     margin: "0 auto",
-                    padding: "80px 40px",
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "60px",
-                    alignItems: "center",
+                    padding: "40px 48px 32px",
+                    textAlign: "center",
+                    position: "relative",
                 }}
             >
-                {/* Left Content */}
-                <div>
-                    <div
-                        style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            padding: "8px 16px",
-                            background: "rgba(25, 118, 210, 0.2)",
-                            borderRadius: "50px",
-                            marginBottom: "24px",
-                            fontSize: "14px",
-                            color: "#64B5F6",
-                        }}
-                    >
-                        <span>🚀</span>
-                        <span>ระบบนับผู้โดยสารอัจฉริยะ</span>
-                    </div>
-
-                    <h1
-                        style={{
-                            fontSize: "56px",
-                            fontWeight: "800",
-                            lineHeight: "1.1",
-                            marginBottom: "24px",
-                            background: "linear-gradient(90deg, #ffffff 0%, #94a3b8 100%)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                        }}
-                    >
-                        นับจำนวนผู้โดยสาร
-                        <br />
-                        <span style={{ color: "#64B5F6", WebkitTextFillColor: "#64B5F6" }}>
-                            อัตโนมัติ
-                        </span>
-                    </h1>
-
-                    <p
-                        style={{
-                            fontSize: "18px",
-                            color: "#94a3b8",
-                            lineHeight: "1.7",
-                            marginBottom: "40px",
-                            maxWidth: "500px",
-                        }}
-                    >
-                        ระบบนับจำนวนผู้โดยสารด้วย AI และกล้อง CCTV
-                        ช่วยให้การบริหารจัดการรถโดยสารเป็นเรื่องง่าย
-                        ติดตามข้อมูลแบบ Real-time
-                    </p>
-
-                    <div style={{ display: "flex", gap: "16px" }}>
-                        <Link
-                            to="/login"
-                            style={{
-                                padding: "16px 32px",
-                                background: "linear-gradient(45deg, #1976D2 30%, #64B5F6 90%)",
-                                borderRadius: "12px",
-                                color: "white",
-                                textDecoration: "none",
-                                fontWeight: "600",
-                                fontSize: "16px",
-                                boxShadow: "0 8px 25px rgba(25, 118, 210, 0.4)",
-                                transition: "all 0.3s",
-                            }}
-                        >
-                            เริ่มต้นใช้งาน
-                        </Link>
-                        <button
-                            style={{
-                                padding: "16px 32px",
-                                background: "transparent",
-                                border: "2px solid #475569",
-                                borderRadius: "12px",
-                                color: "white",
-                                fontWeight: "600",
-                                fontSize: "16px",
-                                cursor: "pointer",
-                                transition: "all 0.3s",
-                            }}
-                        >
-                            ดูเพิ่มเติม →
-                        </button>
-                    </div>
-                </div>
-
-                {/* Right Content - Dashboard Preview */}
+                {/* Badge */}
                 <div
                     style={{
-                        background: "linear-gradient(135deg, rgba(25, 118, 210, 0.2) 0%, rgba(100, 181, 246, 0.1) 100%)",
-                        borderRadius: "24px",
-                        padding: "40px",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "8px 18px",
+                        borderRadius: "50px",
+                        marginBottom: "24px",
+                        fontSize: "13px",
+                        fontWeight: "500",
+                        color: "#ffffff",
+                        background: "rgba(255, 255, 255, 0.1)",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
                         backdropFilter: "blur(10px)",
                     }}
                 >
-                    <div
-                        style={{
-                            background: "rgba(30, 41, 59, 0.8)",
-                            borderRadius: "16px",
-                            padding: "24px",
-                            marginBottom: "16px",
-                        }}
-                    >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                            <span style={{ color: "#94a3b8", fontSize: "14px" }}>ผู้โดยสารวันนี้</span>
-                            <span style={{ color: "#22c55e", fontSize: "12px" }}>+12.5%</span>
-                        </div>
-                        <div style={{ fontSize: "36px", fontWeight: "700" }}>1,234</div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                        <div
-                            style={{
-                                background: "rgba(30, 41, 59, 0.8)",
-                                borderRadius: "12px",
-                                padding: "16px",
-                            }}
-                        >
-                            <div style={{ color: "#94a3b8", fontSize: "12px", marginBottom: "8px" }}>กล้องออนไลน์</div>
-                            <div style={{ fontSize: "24px", fontWeight: "600", color: "#22c55e" }}>6</div>
-                        </div>
-                        <div
-                            style={{
-                                background: "rgba(30, 41, 59, 0.8)",
-                                borderRadius: "12px",
-                                padding: "16px",
-                            }}
-                        >
-                            <div style={{ color: "#94a3b8", fontSize: "12px", marginBottom: "8px" }}>เส้นทาง</div>
-                            <div style={{ fontSize: "24px", fontWeight: "600" }}>4</div>
-                        </div>
-                    </div>
+                    <span style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background: "#22c55e",
+                        animation: "pulse 2s infinite",
+                    }} />
+                    <span>ระบบบริหารจัดการขนส่งครบวงจร</span>
                 </div>
+
+                <h1
+                    style={{
+                        fontSize: "44px",
+                        fontWeight: "800",
+                        lineHeight: "1.15",
+                        marginBottom: "16px",
+                        color: "#ffffff",
+                        letterSpacing: "-1px",
+                    }}
+                >
+                    เลือกระบบที่ต้องการใช้งาน
+                </h1>
+
+                <p
+                    style={{
+                        fontSize: "17px",
+                        color: "rgba(255, 255, 255, 0.85)",
+                        lineHeight: "1.6",
+                        maxWidth: "520px",
+                        margin: "0 auto",
+                    }}
+                >
+                    รวมทุกระบบบริหารจัดการขนส่งของบริษัทไว้ในที่เดียว เข้าถึงง่าย ใช้งานสะดวก
+                </p>
             </section>
 
-            {/* Features Section */}
-            <section id="features" style={{ padding: "80px 40px", maxWidth: "1200px", margin: "0 auto" }}>
-                <h2 style={{ textAlign: "center", fontSize: "36px", fontWeight: "700", marginBottom: "60px" }}>
-                    คุณสมบัติเด่น
-                </h2>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "32px" }}>
-                    {[
-                        { icon: "📹", title: "AI Camera", desc: "ระบบกล้อง AI นับผู้โดยสารอัตโนมัติ แม่นยำสูง" },
-                        { icon: "📊", title: "Real-time Data", desc: "ดูข้อมูลแบบเรียลไทม์ ผ่าน Dashboard ที่ใช้งานง่าย" },
-                        { icon: "🔔", title: "Alert System", desc: "แจ้งเตือนเมื่อมีเหตุการณ์สำคัญหรือผิดปกติ" },
-                    ].map((feature, idx) => (
-                        <div
-                            key={idx}
-                            style={{
-                                background: "rgba(255, 255, 255, 0.05)",
-                                borderRadius: "16px",
-                                padding: "32px",
-                                border: "1px solid rgba(255, 255, 255, 0.1)",
-                                transition: "all 0.3s",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    width: "56px",
-                                    height: "56px",
-                                    background: "linear-gradient(45deg, #1976D2 30%, #64B5F6 90%)",
-                                    borderRadius: "12px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: "24px",
-                                    marginBottom: "20px",
-                                }}
-                            >
-                                {feature.icon}
-                            </div>
-                            <h3 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>{feature.title}</h3>
-                            <p style={{ color: "#94a3b8", lineHeight: "1.6" }}>{feature.desc}</p>
-                        </div>
+            {/* Website Cards Grid */}
+            <section
+                style={{
+                    maxWidth: "1280px",
+                    margin: "0 auto",
+                    padding: "16px 48px 80px",
+                    position: "relative",
+                }}
+            >
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+                        gap: "24px",
+                    }}
+                >
+                    {companyWebsites.map((website) => (
+                        <WebsiteCard
+                            key={website.id}
+                            website={website}
+                            onClick={handleCardClick}
+                        />
                     ))}
                 </div>
             </section>
@@ -274,14 +547,23 @@ export default function LandingPage() {
             <footer
                 style={{
                     borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-                    padding: "40px",
+                    padding: "28px 48px",
                     textAlign: "center",
-                    color: "#64748b",
-                    fontSize: "14px",
+                    color: "rgba(255, 255, 255, 0.6)",
+                    fontSize: "13px",
+                    position: "relative",
+                    background: "rgba(0, 0, 0, 0.1)",
                 }}
             >
-                <p>© 2024 Bus Counter System. All rights reserved.</p>
+                <p>© 2024 SmileHost Transportation Solutions. All rights reserved.</p>
             </footer>
+
+            {/* Modal */}
+            <WebsiteModal
+                website={selectedWebsite}
+                onClose={handleCloseModal}
+                onGo={handleGo}
+            />
         </div>
     );
 }
