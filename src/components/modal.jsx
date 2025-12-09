@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -189,6 +189,19 @@ export default function ReusableModal({
 }) {
   const [formData, setFormData] = useState({});
 
+  // Initialize formData with default values when modal opens or fields change
+  useEffect(() => {
+    if (open && fields.length > 0) {
+      const initialData = {};
+      fields.forEach((field) => {
+        if (field.defaultValue !== undefined) {
+          initialData[field.name] = field.defaultValue;
+        }
+      });
+      setFormData(initialData);
+    }
+  }, [open, fields]);
+
   // Update field value
   const handleFieldChange = (fieldName, value) => {
     setFormData((prev) => ({
@@ -206,7 +219,8 @@ export default function ReusableModal({
 
   // Render input based on type
   const renderField = (field) => {
-    const value = formData[field.name] || field.defaultValue || "";
+    // Use hasOwnProperty to correctly handle empty string values
+    const value = formData.hasOwnProperty(field.name) ? formData[field.name] : (field.defaultValue || "");
 
     switch (field.type) {
       case "text-lang":
