@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 export default function LoginPage() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        email: "",
+        username: "",
         password: "",
     });
     const [showPassword, setShowPassword] = useState(false);
@@ -30,20 +30,85 @@ export default function LoginPage() {
                 minHeight: "100vh",
                 display: "flex",
                 alignItems: "center",
-                background: "linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%)",
                 justifyContent: "center",
                 padding: "20px",
+                background: "linear-gradient(135deg, #0052CC 0%, #1E88E5 50%, #00BCD4 100%)",
+                position: "relative",
+                overflow: "hidden",
             }}
         >
+            {/* CSS Animations */}
+            <style>
+                {`
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes slideUp {
+                        from { 
+                            opacity: 0;
+                            transform: translateY(30px) scale(0.95);
+                        }
+                        to { 
+                            opacity: 1;
+                            transform: translateY(0) scale(1);
+                        }
+                    }
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0) rotate(0deg); }
+                        50% { transform: translateY(-20px) rotate(5deg); }
+                    }
+                    @keyframes pulse {
+                        0%, 100% { opacity: 0.3; }
+                        50% { opacity: 0.5; }
+                    }
+                `}
+            </style>
+
+            {/* Background decorations */}
             <div
                 style={{
+                    position: "absolute",
+                    top: "10%",
+                    left: "5%",
+                    width: "400px",
+                    height: "400px",
+                    background: "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)",
+                    borderRadius: "50%",
+                    opacity: 0.05,
+                    filter: "blur(60px)",
+                    animation: "pulse 8s infinite",
+                    pointerEvents: "none",
+                }}
+            />
+            <div
+                style={{
+                    position: "absolute",
+                    bottom: "10%",
+                    right: "5%",
+                    width: "500px",
+                    height: "500px",
+                    background: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
+                    borderRadius: "50%",
+                    opacity: 0.05,
+                    filter: "blur(100px)",
+                    animation: "pulse 10s infinite 2s",
+                    pointerEvents: "none",
+                }}
+            />
+
+            <div
+                style={{
+                    position: "relative",
+                    zIndex: 10,
                     width: "100%",
                     maxWidth: "420px",
-                    background: "#ffffff",
+                    background: "rgba(255, 255, 255, 0.98)",
                     borderRadius: "20px",
-                    boxShadow: "0 20px 60px rgba(25, 118, 210, 0.15), 0 8px 25px rgba(0, 0, 0, 0.08)",
+                    boxShadow: "0 25px 80px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.2)",
                     padding: "0",
                     overflow: "hidden",
+                    animation: "slideUp 0.6s ease-out",
                 }}
             >
                 {/* Header with Gradient Background */}
@@ -207,8 +272,7 @@ export default function LoginPage() {
                             fontSize: "16px",
                             fontWeight: "600",
                             color: "white",
-                            background: "linear-gradient(45deg, #1976D2 30%, #64B5F6 90%)",
-                            border: "none",
+                            background: "linear-gradient(135deg, #1565C0 0%, #42A5F5 100%)",
                             borderRadius: "12px",
                             cursor: "pointer",
                             transition: "all 0.3s",
