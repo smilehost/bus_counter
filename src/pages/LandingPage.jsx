@@ -7,7 +7,7 @@ const companyWebsites = [
         name: "Bus Counter",
         description: "ระบบนับจำนวนผู้โดยสารด้วย AI และกล้อง CCTV ติดตามข้อมูลแบบ Real-time",
         icon: "🚌",
-        url: "/login",
+        url: "/",
         color: "#1976D2",
         gradient: "linear-gradient(135deg, #1976D2 0%, #64B5F6 100%)",
         isInternal: true,
