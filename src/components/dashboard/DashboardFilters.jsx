@@ -229,18 +229,31 @@ export default function DashboardFilters({
                         </select>
                     </div>
 
-                    {/* Route Filter */}
-                    <select
-                        value={route}
-                        onChange={(e) => onRouteChange(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
-                    >
-                        <option value="all">{t('filters.all_routes')}</option>
-                        <option value="route_a">{t('routes.route_a')}</option>
-                        <option value="route_b">{t('routes.route_b')}</option>
-                        <option value="route_c">{t('routes.route_c')}</option>
-                        <option value="route_d">{t('routes.route_d')}</option>
-                    </select>
+                    {/* Route Filter - Dynamic based on company */}
+                    {(() => {
+                        const companyRoutes = {
+                            company_a: ["route_r1", "route_r3", "route_b1"],
+                            company_b: ["route_515", "route_140", "route_511", "route_29", "route_504"],
+                            company_c: ["route_kk_red", "route_kk_blue", "route_kk_songthaew8"],
+                        };
+                        const allRoutes = [...companyRoutes.company_a, ...companyRoutes.company_b, ...companyRoutes.company_c];
+                        const routesToShow = company === "all" ? allRoutes : (companyRoutes[company] || []);
+
+                        return (
+                            <select
+                                value={route}
+                                onChange={(e) => onRouteChange(e.target.value)}
+                                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
+                            >
+                                <option value="all">{t('filters.all_routes')}</option>
+                                {routesToShow.map((routeKey) => (
+                                    <option key={routeKey} value={routeKey}>
+                                        {t(`routes.${routeKey}`)}
+                                    </option>
+                                ))}
+                            </select>
+                        );
+                    })()}
                 </div>
 
                 {/* Second Row - Time & Interval Options */}

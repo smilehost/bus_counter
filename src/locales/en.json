@@ -83,15 +83,22 @@
         "per_page": "per page"
     },
     "companies": {
-        "company_a": "Company A",
-        "company_b": "Company B",
-        "company_c": "Company C"
+        "company_a": "Bussing Chiang Mai",
+        "company_b": "Bussing Bangkok",
+        "company_c": "Bussing Khon Kaen"
     },
     "routes": {
-        "route_a": "Route A",
-        "route_b": "Route B",
-        "route_c": "Route C",
-        "route_d": "Route D"
+        "route_r1": "R1: Zoo - Central Festival",
+        "route_r3": "R3: Airport - Old City",
+        "route_b1": "B1: Arcade - Railway Station",
+        "route_515": "515: Salaya - Victory Monument",
+        "route_140": "140: Samae Dam - Victory Monument",
+        "route_511": "511: Pak Nam - Sai Tai Mai",
+        "route_29": "29: Rangsit - Hua Lamphong",
+        "route_504": "504: Rangsit - Bang Rak",
+        "route_kk_red": "City Bus (Red): Bus Terminal 3 - City Center",
+        "route_kk_blue": "City Bus (Blue): KKU - Central Plaza",
+        "route_kk_songthaew8": "Song Thaew 8: KKU - Tontann Market"
     },
     "manage_camera": {
         "title": "Manage Cameras",
