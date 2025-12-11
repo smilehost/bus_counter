@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 // Components
 import DashboardFilters from "../components/dashboard/DashboardFilters";
 import DataTable from "../components/dashboard/DataTable";
+import BusMap from "../components/dashboard/BusMap";
 
 // Store
 import { useDashboardStore } from "../store/dashboardStore";
@@ -41,10 +42,10 @@ const StatsCard = ({ title, value, change, changeType, icon: Icon, bgColor }) =>
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  
+
   // 1. ดึง State และ Actions จาก Store
   const { filters, data, setFilter } = useDashboardStore();
-  
+
   // 2. Derived State (คำนวณข้อมูลที่จะแสดงผลตาม Filter)
   // การคำนวณนี้ทำใน Component เพื่อให้ Reactive กับการเปลี่ยน Filter ทันที
   const currentBarData = data.barChart[filters.company] || data.barChart.all;
@@ -66,15 +67,14 @@ export default function Dashboard() {
       accessor: "status",
       render: (row) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            row.status === "Completed" ? "bg-green-100 text-green-700"
+          className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "Completed" ? "bg-green-100 text-green-700"
             : row.status === "In Progress" ? "bg-blue-100 text-blue-700"
-            : "bg-gray-100 text-gray-700"
-          }`}
+              : "bg-gray-100 text-gray-700"
+            }`}
         >
           {row.status === "Completed" ? t('table.completed') :
-           row.status === "In Progress" ? t('table.in_progress') :
-           t('table.scheduled')}
+            row.status === "In Progress" ? t('table.in_progress') :
+              t('table.scheduled')}
         </span>
       ),
     },
@@ -137,18 +137,16 @@ export default function Dashboard() {
           <div className="flex gap-2">
             <button
               onClick={() => setFilter('chartType', 'bar')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filters.chartType === "bar" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.chartType === "bar" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               <BarChart3 size={18} />
               {t('dashboard.bar_chart')}
             </button>
             <button
               onClick={() => setFilter('chartType', 'pie')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filters.chartType === "pie" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.chartType === "pie" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               <PieChartIcon size={18} />
               {t('dashboard.pie_chart')}
@@ -197,6 +195,9 @@ export default function Dashboard() {
           )}
         </ResponsiveContainer>
       </div>
+
+      {/* Bus Map */}
+      <BusMap company={filters.company} route={filters.route} />
 
       {/* Data Table */}
       <div className="mb-6">

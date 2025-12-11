@@ -21,7 +21,10 @@
         "revenue_by_route": "รายได้แยกตามเส้นทาง",
         "recent_transactions": "ธุรกรรมล่าสุด",
         "bar_chart": "แผนภูมิแท่ง",
-        "pie_chart": "แผนภูมิวงกลม"
+        "pie_chart": "แผนภูมิวงกลม",
+        "bus_map_title": "ติดตามรถบัสแบบสด",
+        "bus": "รถบัส",
+        "showing_buses": "แสดง {{count}} คัน"
     },
     "filters": {
         "label": "ตัวกรอง:",

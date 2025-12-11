@@ -21,7 +21,10 @@
         "revenue_by_route": "Revenue by Route",
         "recent_transactions": "Recent Transactions",
         "bar_chart": "Bar Chart",
-        "pie_chart": "Pie Chart"
+        "pie_chart": "Pie Chart",
+        "bus_map_title": "Live Bus Tracking",
+        "bus": "Bus",
+        "showing_buses": "Showing {{count}} buses"
     },
     "filters": {
         "label": "Filters:",
