@@ -21,6 +21,7 @@ export default function ManageCamera() {
 
   // Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // New State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState(null);
 
@@ -65,6 +66,12 @@ export default function ManageCamera() {
     setIsEditModalOpen(false);
   };
 
+  const handleAddConfirm = (formData) => {
+    console.log("Adding new camera:", formData);
+    // TODO: Implement add action in store
+    setIsAddModalOpen(false);
+  };
+
   const handleDeleteConfirm = () => {
     console.log("Deleting camera:", selectedCamera?.install_id);
     // TODO: Implement delete action in store
@@ -106,6 +113,45 @@ export default function ManageCamera() {
     ];
   };
 
+  const getAddFields = () => {
+    return [
+      {
+        type: "text",
+        name: "camera_name",
+        label: t('table.camera_name', 'Camera Name'),
+        defaultValue: "",
+      },
+      {
+        type: "number",
+        name: "bus_id",
+        label: t('table.bus_id', 'Bus ID'),
+        defaultValue: "",
+      },
+      {
+        type: "number",
+        name: "door_number",
+        label: t('table.door_number', 'Door Number'),
+        defaultValue: "1",
+      },
+      {
+        type: "text",
+        name: "installed_assces_key",
+        label: t('table.access_key', 'Access Key'),
+        defaultValue: "",
+      },
+      {
+        type: "select",
+        name: "installed_on_activate",
+        label: t('table.status', 'Status'),
+        defaultValue: "true",
+        options: [
+          { value: "true", label: t('manage_camera.active', 'Active') },
+          { value: "false", label: t('manage_camera.inactive', 'Inactive') },
+        ]
+      }
+    ];
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-sans">
       {/* Page Header */}
@@ -128,7 +174,7 @@ export default function ManageCamera() {
             color="primary"
             size="md"
             icon={<Plus size={20} />}
-            onClick={() => console.log("Add New")}
+            onClick={() => setIsAddModalOpen(true)}
           >
             {t('manage_camera.add_new_camera')}
           </CustomButton>
@@ -343,6 +389,17 @@ export default function ManageCamera() {
         onConfirm={handleEditConfirm}
         fields={getEditFields()}
         variant="info"
+      />
+
+      {/* Add Modal */}
+      <ReusableModal
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title={t('manage_camera.add_new_camera', 'Add New Camera')}
+        confirmText={t('common.add', 'Add')}
+        onConfirm={handleAddConfirm}
+        fields={getAddFields()}
+        variant="primary"
       />
 
       {/* Delete Modal */}
