@@ -1,7 +1,8 @@
 // components/Sidebar.jsx
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
 import { useTranslation } from 'react-i18next';
 import {
   Drawer,
@@ -53,6 +54,8 @@ const menus = [
 
 export default function Sidebar({ role, open, onClose }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const primaryColor = "#1976D2";
   const secondaryColor = "#64B5F6";
   const shadowColor = "rgba(25, 118, 210, 0.25)";
@@ -222,6 +225,10 @@ export default function Sidebar({ role, open, onClose }) {
 
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
         <ListItemButton
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
           sx={{
             borderRadius: "12px",
             minHeight: { xs: 44, sm: 48 },

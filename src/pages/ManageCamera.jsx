@@ -1,17 +1,21 @@
-import React, { useState } from "react";
-import { Filter, Plus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useCameraStore } from "../store/cameraStore";
+import { Search, Filter, Plus, Monitor, Bus, DoorOpen, MoreHorizontal, RefreshCcw } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import CustomButton from "../components/CustomButto";
 import ReusableModal from "../components/modal";
-import LockIcon from '@mui/icons-material/Lock';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import Chip from '@mui/material/Chip';
 
 export default function ManageCamera() {
   const { t } = useTranslation();
+  const { cameras, loading, error, fetchCameras } = useCameraStore();
+
+  // Local state for UI
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [companyFilter, setCompanyFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -20,458 +24,346 @@ export default function ManageCamera() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState(null);
 
-  // Mock camera data with company and schedule
-  const cameras = [
-    {
-      id: 1,
-      name: "Northern Express",
-      company: "Northern Bus Co.",
-      schedule: "Daily",
-      departureTimes: "08:00, 12:00, 16:00",
-      status: "active",
-      color: "#1976D2", // Blue
-    },
-    {
-      id: 2,
-      name: "Southern Route",
-      company: "Southern Express",
-      schedule: "Weekdays",
-      departureTimes: "07:30, 13:30, 18:30",
-      status: "active",
-      color: "#2E7D32", // Green
-    },
-    {
-      id: 3,
-      name: "Eastern Circuit",
-      company: "Eastern Transport",
-      schedule: "Weekends",
-      departureTimes: "09:00, 15:00",
-      status: "active",
-      color: "#F57C00", // Orange
-    },
-    {
-      id: 4,
-      name: "Western Line",
-      company: "Western Motors",
-      schedule: "Daily",
-      departureTimes: "06:00, 10:00, 14:00, 18:00",
-      status: "inactive",
-      color: "#7B1FA2", // Purple
-    },
-    {
-      id: 5,
-      name: "Central Express",
-      company: "Northern Bus Co.",
-      schedule: "Daily",
-      departureTimes: "07:00, 11:00, 15:00, 19:00",
-      status: "active",
-      color: "#C62828", // Red
-    },
-    {
-      id: 6,
-      name: "Coastal Route",
-      company: "Southern Express",
-      schedule: "Weekdays",
-      departureTimes: "08:30, 14:30",
-      status: "active",
-      color: "#0097A7", // Cyan
-    },
-  ];
+  useEffect(() => {
+    fetchCameras();
+  }, [fetchCameras]);
 
-  const handleAddCamera = () => {
-    console.log("Add camera clicked");
-  };
+  // Filtering Logic
+  const filteredCameras = cameras.filter((cam) => {
+    const searchLower = searchQuery.toLowerCase();
+    const matchSearch =
+      cam.camera_name?.toLowerCase().includes(searchLower) ||
+      String(cam.bus_id).includes(searchLower) ||
+      cam.installed_assces_key?.toLowerCase().includes(searchLower);
 
-  const handleViewCamera = (camera) => {
-    console.log("View camera:", camera);
-  };
+    const matchStatus = statusFilter === "all"
+      ? true
+      : String(Number(cam.installed_on_activate)) === statusFilter;
 
-  const handleEditCamera = (camera) => {
+    return matchSearch && matchStatus;
+  });
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredCameras.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentCameras = filteredCameras.slice(startIndex, startIndex + itemsPerPage);
+
+  // Handlers
+  const handleEdit = (camera) => {
     setSelectedCamera(camera);
     setIsEditModalOpen(true);
   };
 
-  const handleEditConfirm = (formData) => {
-    console.log("Edit camera confirmed:", formData);
-    console.log("Selected camera:", selectedCamera);
-    // TODO: ส่งข้อมูลไป API เพื่ออัปเดต
-    setIsEditModalOpen(false);
-    setSelectedCamera(null);
-  };
-
-  const handleDeleteCamera = (camera) => {
+  const handleDelete = (camera) => {
     setSelectedCamera(camera);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    console.log("Delete camera confirmed:", selectedCamera);
-    // TODO: ส่งข้อมูลไป API เพื่อลบ
-    setIsDeleteModalOpen(false);
-    setSelectedCamera(null);
+  const handleEditConfirm = (formData) => {
+    console.log("Saving camera:", formData);
+    // TODO: Implement update action in store
+    setIsEditModalOpen(false);
   };
 
-  // Get edit modal fields config
-  const getEditModalFields = () => {
-    if (!selectedCamera) return [];
+  const handleDeleteConfirm = () => {
+    console.log("Deleting camera:", selectedCamera?.install_id);
+    // TODO: Implement delete action in store
+    setIsDeleteModalOpen(false);
+  };
 
+  // Field Configs
+  const getEditFields = () => {
+    if (!selectedCamera) return [];
     return [
       {
-        type: "disabled",
-        name: "id",
-        label: "Camera ID",
-        value: `CAM-${String(selectedCamera.id).padStart(3, '0')}`,
+        type: "text",
+        name: "camera_name",
+        label: t('table.camera_name', 'Camera Name'),
+        defaultValue: selectedCamera.camera_name,
       },
       {
-        type: "text-lang",
-        name: "name_en",
-        label: "Camera Name",
-        language: "EN",
-        defaultValue: selectedCamera.name,
+        type: "number",
+        name: "bus_id",
+        label: t('table.bus_id', 'Bus ID'),
+        defaultValue: selectedCamera.bus_id,
       },
       {
-        type: "text-lang",
-        name: "name_th",
-        label: "Camera Name",
-        language: "TH",
-        defaultValue: "",
+        type: "number",
+        name: "door_number",
+        label: t('table.door_number', 'Door Number'),
+        defaultValue: selectedCamera.door_number,
       },
       {
-        type: "text-lang",
-        name: "company",
-        label: "Company",
-        language: "EN",
-        defaultValue: selectedCamera.company,
-      },
-      {
-        type: "textarea",
-        name: "departureTimes",
-        label: "Departure Times",
-        rows: 2,
-        maxLength: 200,
-        defaultValue: selectedCamera.departureTimes,
-      },
+        type: "select",
+        name: "installed_on_activate",
+        label: t('table.status', 'Status'),
+        defaultValue: selectedCamera.installed_on_activate ? "true" : "false",
+        options: [
+          { value: "true", label: t('manage_camera.active', 'Active') },
+          { value: "false", label: t('manage_camera.inactive', 'Inactive') },
+        ]
+      }
     ];
   };
 
-  // Filter cameras
-  const filteredCameras = cameras.filter((camera) => {
-    const matchesSearch =
-      camera.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      camera.company.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || camera.status === statusFilter;
-    const matchesCompany = companyFilter === "all" || camera.company === companyFilter;
-
-    return matchesSearch && matchesStatus && matchesCompany;
-  });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredCameras.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentCameras = filteredCameras.slice(startIndex, endIndex);
-
-  // Get unique companies for filter
-  const companies = [...new Set(cameras.map(c => c.company))];
-
   return (
-    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1">{t('manage_camera.title')}</h1>
-        <p className="text-sm text-gray-600">{t('manage_camera.subtitle')}</p>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="bg-white rounded-lg p-4 shadow-sm mb-6">
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
-          {/* Search Bar */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder={t('manage_camera.search_placeholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Filters */}
-          <div className="flex items-center gap-2 text-gray-600">
-            <Filter size={18} />
-            <span className="text-sm font-medium">{t('filters.label')}</span>
-          </div>
-
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
+    <div className="p-6 bg-gray-50 min-h-screen font-sans">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">{t('manage_camera.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('manage_camera.subtitle', 'Manage all your installed cameras and configurations')}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <CustomButton
+            variant="outline"
+            size="md"
+            onClick={() => fetchCameras()}
+            icon={<RefreshCcw size={18} className={loading ? "animate-spin" : ""} />}
           >
-            <option value="all">{t('filters.all_status')}</option>
-            <option value="active">{t('manage_camera.active')}</option>
-            <option value="inactive">{t('manage_camera.inactive')}</option>
-          </select>
-
-          {/* Company Filter */}
-          <select
-            value={companyFilter}
-            onChange={(e) => setCompanyFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
-          >
-            <option value="all">{t('filters.all_companies')}</option>
-            {companies.map((company) => (
-              <option key={company} value={company}>{company}</option>
-            ))}
-          </select>
-
-          {/* Add Button */}
+            {t('common.refresh', 'Refresh')}
+          </CustomButton>
           <CustomButton
             variant="solid"
             color="primary"
             size="md"
             icon={<Plus size={20} />}
-            onClick={handleAddCamera}
-            className="whitespace-nowrap"
+            onClick={() => console.log("Add New")}
           >
             {t('manage_camera.add_new_camera')}
           </CustomButton>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Stats / Overview Cards (Optional - functionality placeholder) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+          <div className="p-3 bg-blue-50 rounded-lg text-blue-600">
+            <Monitor size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Total Cameras</p>
+            <p className="text-2xl font-bold text-gray-800">{cameras.length}</p>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+          <div className="p-3 bg-green-50 rounded-lg text-green-600">
+            <div className="w-6 h-6 rounded-full border-2 border-green-500 animate-pulse bg-green-200"></div>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Active Now</p>
+            <p className="text-2xl font-bold text-gray-800">
+              {cameras.filter(c => c.installed_on_activate).length}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Control Bar: Search & Filter */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder={t('manage_camera.search_placeholder', 'Search camera, bus ID...')}
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+            <Filter size={18} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-600 mr-2">{t('filters.label', 'Filter By:')}</span>
+            <select
+              className="bg-transparent text-sm font-medium text-gray-800 focus:outline-none cursor-pointer"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">{t('filters.all_status', 'All Status')}</option>
+              <option value="1">{t('manage_camera.active', 'Active')}</option>
+              <option value="0">{t('manage_camera.inactive', 'Inactive')}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  {t('table.camera')}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  {t('table.company')}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  {t('table.schedule')}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  {t('table.status')}
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  {t('table.actions')}
-                </th>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold tracking-wider">
+                <th className="px-6 py-4">ID</th>
+                <th className="px-6 py-4">{t('table.camera_info', 'Camera Info')}</th>
+                <th className="px-6 py-4">{t('table.bus_info', 'Bus / Door')}</th>
+                <th className="px-6 py-4">{t('table.access_key', 'Access Key')}</th>
+                <th className="px-6 py-4 text-center">{t('table.status', 'Status')}</th>
+                <th className="px-6 py-4 text-center">{t('table.actions', 'Actions')}</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {currentCameras.length > 0 ? (
-                currentCameras.map((camera) => (
-                  <tr key={camera.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-1 h-12 rounded-full"
-                          style={{ backgroundColor: camera.color }}
-                        />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {camera.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {camera.departureTimes}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm text-gray-700">{camera.company}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm text-gray-700">{camera.schedule}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${camera.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                          }`}
-                      >
-                        {camera.status === "active" ? t('manage_camera.active') : t('manage_camera.inactive')}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <CustomButton
-                          variant="ghost"
-                          size="sm"
-                          onlyIcon
-                          icon={<LockIcon />}
-                          iconColor="#10B981"
-                          onClick={() => handleViewCamera(camera)}
-                        />
-                        <CustomButton
-                          variant="ghost"
-                          size="sm"
-                          onlyIcon
-                          icon={<EditIcon />}
-                          iconColor="#1976D2"
-                          onClick={() => handleEditCamera(camera)}
-                        />
-                        <CustomButton
-                          variant="ghost"
-                          size="sm"
-                          onlyIcon
-                          icon={<DeleteIcon />}
-                          iconColor="#EF4444"
-                          onClick={() => handleDeleteCamera(camera)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12 text-center">
-                    <div className="text-gray-500">
-                      <p className="text-lg font-medium mb-2">{t('manage_camera.no_cameras_found')}</p>
+                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <RefreshCcw className="animate-spin text-blue-500" size={32} />
+                      <span>{t('common.loading', 'Loading data...')}</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-red-500 bg-red-50">
+                    <p className="font-medium">{t('common.error', 'Error loading data')}</p>
+                    <p className="text-sm opacity-75">{error}</p>
+                  </td>
+                </tr>
+              ) : currentCameras.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center gap-2">
+                      <Monitor size={48} className="text-gray-200" />
+                      <p className="text-lg font-medium">{t('manage_camera.no_cameras_found')}</p>
                       <p className="text-sm">{t('manage_camera.adjust_search')}</p>
                     </div>
                   </td>
                 </tr>
+              ) : (
+                currentCameras.map((cam) => (
+                  <tr key={cam.install_id} className="hover:bg-blue-50/30 transition-colors group">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-500">
+                      #{cam.install_id}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                          <Monitor size={20} />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{cam.camera_name}</p>
+                          <p className="text-xs text-gray-500">Updated: {new Date(cam.updated_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <Bus size={16} className="text-gray-400" />
+                          <span className="font-medium">Bus {cam.bus_id}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <DoorOpen size={14} />
+                          <span>Door {cam.door_number}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <code className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-mono border border-gray-200">
+                        {cam.installed_assces_key}
+                      </code>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${cam.installed_on_activate
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : 'bg-gray-100 text-gray-600 border border-gray-200'
+                        }`}>
+                        <span className={`w-2 h-2 rounded-full mr-2 ${cam.installed_on_activate ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                        {cam.installed_on_activate ? t('manage_camera.active', 'Active') : t('manage_camera.inactive', 'Inactive')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="tooltip" title="View Details">
+                          <CustomButton onlyIcon variant="ghost" size="sm" icon={<VisibilityIcon fontSize="small" className="text-gray-500 hover:text-blue-600" />} />
+                        </div>
+                        <div className="tooltip" title="Edit">
+                          <CustomButton onlyIcon variant="ghost" size="sm" onClick={() => handleEdit(cam)} icon={<EditIcon fontSize="small" className="text-gray-500 hover:text-amber-500" />} />
+                        </div>
+                        <div className="tooltip" title="Delete">
+                          <CustomButton onlyIcon variant="ghost" size="sm" onClick={() => handleDelete(cam)} icon={<DeleteIcon fontSize="small" className="text-gray-500 hover:text-red-500" />} />
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination */}
-        {filteredCameras.length > 0 && (
-          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              {/* Results Info */}
-              <div className="text-sm text-gray-600">
-                {t('table.showing')} {startIndex + 1} {t('table.to')} {Math.min(endIndex, filteredCameras.length)} {t('table.of')} {filteredCameras.length} {t('table.entries')}
-              </div>
-
-              {/* Pagination Controls */}
-              <div className="flex items-center gap-2">
-                {/* Previous Button */}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${currentPage === 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                    }`}
-                >
-                  ‹
-                </button>
-
-                {/* Page Numbers */}
-                {[...Array(totalPages)].map((_, index) => {
-                  const pageNum = index + 1;
-                  // Show first page, last page, current page, and pages around current
-                  if (
-                    pageNum === 1 ||
-                    pageNum === totalPages ||
-                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                  ) {
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${currentPage === pageNum
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                          }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  } else if (
-                    pageNum === currentPage - 2 ||
-                    pageNum === currentPage + 2
-                  ) {
-                    return <span key={pageNum} className="text-gray-400">...</span>;
-                  }
-                  return null;
-                })}
-
-                {/* Next Button */}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${currentPage === totalPages
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                    }`}
-                >
-                  ›
-                </button>
-
-                {/* Items per page */}
-                <div className="ml-4 flex items-center gap-2">
-                  <select
-                    className="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    defaultValue={itemsPerPage}
+        {/* Pagination Footer */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-gray-500">
+            {t('table.showing')} {cameras.length > 0 ? startIndex + 1 : 0} {t('table.to')} {Math.min(startIndex + itemsPerPage, cameras.length)} {t('table.of')} {cameras.length} {t('table.entries')}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-white disabled:opacity-50 transition-colors"
+            >
+              Previous
+            </button>
+            <div className="flex gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Logic to show reasonable page numbers (simplified here)
+                let p = i + 1;
+                if (totalPages > 5 && currentPage > 3) p = currentPage - 2 + i;
+                if (p > totalPages) return null;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setCurrentPage(p)}
+                    className={`w-8 h-8 flex items-center justify-center text-sm rounded ${currentPage === p ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 hover:bg-gray-50'}`}
                   >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
-                  <span className="text-sm text-gray-600">{t('table.per_page')}</span>
-                </div>
-              </div>
+                    {p}
+                  </button>
+                )
+              })}
             </div>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-white disabled:opacity-50 transition-colors"
+            >
+              Next
+            </button>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Edit Camera Modal */}
+      {/* Edit Modal */}
       <ReusableModal
         open={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedCamera(null);
-        }}
-        title={`${t('manage_camera.edit')} ${selectedCamera?.name || ''}`}
-        fields={getEditModalFields()}
-        confirmText={t('manage_camera.edit')}
+        onClose={() => setIsEditModalOpen(false)}
+        title={t('manage_camera.edit_camera')}
+        confirmText={t('common.save')}
         onConfirm={handleEditConfirm}
+        fields={getEditFields()}
         variant="info"
       />
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       <ReusableModal
         open={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setSelectedCamera(null);
-        }}
-        title={t('manage_camera.delete')}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title={t('manage_camera.delete_camera')}
+        confirmText={t('common.delete')}
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
         fields={[
           {
-            type: "warning",
-            name: "warning",
-            variant: "danger",
-            icon: "🗑️",
-            message: `คุณต้องการลบกล้อง "${selectedCamera?.name || ''}" ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้`,
+            type: 'info',
+            label: t('table.camera_name'),
+            value: selectedCamera?.camera_name
           },
           {
-            type: "info",
-            name: "cameraName",
-            label: "ชื่อกล้อง",
-            value: selectedCamera?.name || '',
-          },
-          {
-            type: "info",
-            name: "company",
-            label: "บริษัท",
-            value: selectedCamera?.company || '',
-          },
+            type: 'warning',
+            message: t('manage_camera.delete_confirmation', 'Are you sure you want to delete this camera? This action cannot be undone.')
+          }
         ]}
-        confirmText={t('manage_camera.delete')}
-        onConfirm={handleDeleteConfirm}
-        variant="danger"
       />
     </div>
   );

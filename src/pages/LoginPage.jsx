@@ -21,7 +21,7 @@ export default function LoginPage() {
         e.preventDefault();
         console.log("Login submitted:", formData);
         // TODO: Implement actual login logic
-        navigate("/");
+        navigate("/landing");
     };
 
     return (
