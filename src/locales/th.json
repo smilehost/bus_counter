@@ -24,7 +24,8 @@
         "pie_chart": "แผนภูมิวงกลม",
         "bus_map_title": "ติดตามรถบัสแบบสด",
         "bus": "รถบัส",
-        "showing_buses": "แสดง {{count}} คัน"
+        "showing_buses": "แสดง {{count}} คัน",
+        "people": "คน"
     },
     "filters": {
         "label": "ตัวกรอง:",

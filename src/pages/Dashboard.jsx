@@ -69,7 +69,7 @@ const generateAllBuses = () => {
 // Helper to create marker element - Pin style
 const createMarkerElement = (bus) => {
   const el = document.createElement("div");
-  el.style.cssText = "cursor: pointer; transition: transform 0.2s ease;";
+  el.style.cssText = "cursor: pointer; transition: transform 0.2s ease; width: 40px; height: 50px;";
 
   // Company colors
   const companyColors = {
@@ -139,9 +139,6 @@ const createMarkerElement = (bus) => {
       "></div>
     </div>
   `;
-
-  el.onmouseenter = () => { el.style.transform = "scale(1.15)"; };
-  el.onmouseleave = () => { el.style.transform = "scale(1)"; };
 
   return el;
 };
@@ -248,15 +245,27 @@ export default function Dashboard() {
   const currentBarData = data.barChart[filters.company] || data.barChart.all;
   const currentPieData = data.pieChart[filters.company] || data.pieChart.all;
 
-  // Translate route keys to display names for charts
-  const translatedBarData = currentBarData.map(item => ({
+  // Generate passengers data based on revenue (rough estimate: 30 baht per passenger)
+  const enrichedBarData = currentBarData.map(item => ({
     ...item,
-    name: t(`routes.${item.name}`),
+    passengers: Math.floor(item.value / 30) + Math.floor(Math.random() * 20),
   }));
+
+  // Translate route keys to display names for charts - shorten names
+  const translatedBarData = enrichedBarData.map(item => {
+    const fullName = t(`routes.${item.name}`);
+    // Shorten route names for better display
+    const shortName = fullName.length > 12 ? fullName.substring(0, 10) + '...' : fullName;
+    return {
+      ...item,
+      name: shortName,
+      fullName: fullName,
+    };
+  });
 
   const filteredBarData = filters.route === "all"
     ? translatedBarData
-    : translatedBarData.filter(item => currentBarData.find(d => d.name === filters.route && t(`routes.${d.name}`) === item.name));
+    : translatedBarData.filter(item => enrichedBarData.find(d => d.name === filters.route && t(`routes.${d.name}`).includes(item.name.replace('...', ''))));
 
   // Filter table data based on company and route
   const filteredTableData = data.transactions.filter(row => {
@@ -383,12 +392,13 @@ export default function Dashboard() {
         const el = createMarkerElement(bus);
 
         const popup = new maptilersdk.Popup({
-          offset: 25,
+          offset: [0, -45],
           closeButton: true,
           closeOnClick: false,
+          anchor: 'bottom',
         }).setHTML(createPopupContent(bus, t));
 
-        const marker = new maptilersdk.Marker({ element: el })
+        const marker = new maptilersdk.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([bus.lng, bus.lat])
           .setPopup(popup)
           .addTo(map.current);
@@ -483,34 +493,82 @@ export default function Dashboard() {
 
         <ResponsiveContainer width="100%" height="85%">
           {filters.chartType === "bar" ? (
-            <BarChart data={filteredBarData} margin={{ top: 10, right: 20, left: 0, bottom: 80 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <BarChart data={filteredBarData} margin={{ top: 10, right: 15, left: -10, bottom: 60 }}>
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FF9800" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#F57C00" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 11, fill: "#666" }}
-                angle={-45}
+                tick={{ fontSize: 9, fill: "#888" }}
+                angle={-35}
                 textAnchor="end"
-                height={80}
+                height={60}
                 interval={0}
+                axisLine={{ stroke: '#e0e0e0' }}
+                tickLine={false}
               />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => `฿${(value / 1000).toFixed(0)}k`} />
+              <YAxis
+                tick={{ fontSize: 9, fill: "#888" }}
+                tickFormatter={(value) => `฿${(value / 1000).toFixed(0)}k`}
+                axisLine={false}
+                tickLine={false}
+                width={45}
+              />
               <Tooltip
-                contentStyle={{ backgroundColor: "white", border: "1px solid #e0e0e0", borderRadius: 8, fontSize: 12 }}
-                formatter={(value) => [`฿${value.toLocaleString()}`, "รายได้"]}
+                contentStyle={{
+                  backgroundColor: "rgba(255,255,255,0.98)",
+                  border: "none",
+                  borderRadius: 12,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  padding: "12px 16px"
+                }}
+                cursor={{ fill: 'rgba(255, 152, 0, 0.1)' }}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div style={{ background: 'white', padding: '12px 16px', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
+                        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8, color: '#333' }}>
+                          {data.fullName || data.name}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, color: '#888' }}>{t('table.revenue')}:</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#FF9800' }}>฿{data.value.toLocaleString()}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 11, color: '#888' }}>{t('table.passengers')}:</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#1976D2' }}>{data.passengers} {t('dashboard.people')}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
               />
-              <Bar dataKey="value" fill={ACCENT_COLOR} radius={[8, 8, 0, 0]} />
+              <Bar
+                dataKey="value"
+                fill="url(#barGradient)"
+                radius={[6, 6, 0, 0]}
+                maxBarSize={40}
+              />
             </BarChart>
           ) : (
             <PieChart>
               <Pie
                 data={currentPieData}
                 cx="50%"
-                cy="50%"
+                cy="45%"
                 labelLine={false}
                 label={CustomPieLabel}
-                outerRadius={110}
+                outerRadius={100}
+                innerRadius={45}
                 fill="#8884d8"
                 dataKey="value"
+                paddingAngle={3}
               >
                 {currentPieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -518,9 +576,11 @@ export default function Dashboard() {
               </Pie>
               <Legend
                 verticalAlign="bottom"
-                height={36}
+                height={40}
+                iconType="circle"
+                iconSize={8}
                 formatter={(value, entry) => (
-                  <span style={{ color: "#666", fontSize: "0.875rem" }}>
+                  <span style={{ color: "#555", fontSize: "0.75rem", fontWeight: 500 }}>
                     {value}: {entry.payload.value}%
                   </span>
                 )}

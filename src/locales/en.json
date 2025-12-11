@@ -24,7 +24,8 @@
         "pie_chart": "Pie Chart",
         "bus_map_title": "Live Bus Tracking",
         "bus": "Bus",
-        "showing_buses": "Showing {{count}} buses"
+        "showing_buses": "Showing {{count}} buses",
+        "people": "people"
     },
     "filters": {
         "label": "Filters:",
