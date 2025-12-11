@@ -7,28 +7,25 @@ import { useTranslation } from 'react-i18next';
 import * as maptilersdk from "@maptiler/sdk";
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 
-// Components
+
 import DashboardFilters from "../components/dashboard/DashboardFilters";
 import DataTable from "../components/dashboard/DataTable";
 
-// Store
+
 import { useDashboardStore } from "../store/dashboardStore";
 
-// MapTiler API Key
+
 maptilersdk.config.apiKey = "gMPRNdZ7nFG7TFsWmEQr";
 
-// Color scheme constants
+
 const ACCENT_COLOR = "#FFA726";
 
-// Company locations
-const COMPANY_LOCATIONS = {
-  company_a: { lat: 18.7883, lng: 98.9853, name: "Chiang Mai" },   // เชียงใหม่
-  company_b: { lat: 13.7563, lng: 100.5018, name: "Bangkok" },     // กรุงเทพฯ
-  company_c: { lat: 16.4419, lng: 102.8360, name: "Khon Kaen" },   // ขอนแก่น
-};
 
-// Function to generate mock buses for all companies at their locations
-// Function to generate mock buses for all companies at their locations
+const COMPANY_LOCATIONS = {
+  company_a: { lat: 18.7883, lng: 98.9853, name: "Chiang Mai" },
+  company_b: { lat: 13.7563, lng: 100.5018, name: "Bangkok" },
+  company_c: { lat: 16.4419, lng: 102.8360, name: "Khon Kaen" },
+};
 const generateAllBuses = () => {
   const companyRoutes = {
     company_a: ["route_r1", "route_r3", "route_b1"],
@@ -42,17 +39,17 @@ const generateAllBuses = () => {
   Object.entries(companyRoutes).forEach(([company, routes]) => {
     const location = COMPANY_LOCATIONS[company];
     routes.forEach((route) => {
-      // Create 2-3 buses per route
+
       const busCount = Math.floor(Math.random() * 2) + 2;
 
       for (let i = 0; i < busCount; i++) {
-        // Random offset within ~5km radius around company location
+
         const latOffset = (Math.random() - 0.5) * 0.08;
         const lngOffset = (Math.random() - 0.5) * 0.08;
 
         buses.push({
           id: id++,
-          route: route, // Use translation key as route identifier
+          route: route,
           company,
           lat: location.lat + latOffset,
           lng: location.lng + lngOffset,
@@ -66,12 +63,11 @@ const generateAllBuses = () => {
   return buses;
 };
 
-// Helper to create marker element - Pin style
 const createMarkerElement = (bus) => {
   const el = document.createElement("div");
   el.style.cssText = "cursor: pointer; transition: transform 0.2s ease; width: 40px; height: 50px;";
 
-  // Company colors
+
   const companyColors = {
     company_a: { bg: "linear-gradient(180deg, #E91E63 0%, #C2185B 100%)", shadow: "rgba(233, 30, 99, 0.5)" },
     company_b: { bg: "linear-gradient(180deg, #2196F3 0%, #1565C0 100%)", shadow: "rgba(33, 150, 243, 0.5)" },
@@ -90,7 +86,7 @@ const createMarkerElement = (bus) => {
 
   el.innerHTML = `
     <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
-      <!-- Pin Head -->
+
       <div style="
         width: 40px; 
         height: 40px; 
@@ -103,7 +99,7 @@ const createMarkerElement = (bus) => {
         box-shadow: 0 4px 15px ${colors.shadow};
         border: 3px solid white;
       ">
-        <!-- Bus Icon -->
+
         <div style="transform: rotate(45deg);">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 6v6"></path>
@@ -116,7 +112,7 @@ const createMarkerElement = (bus) => {
           </svg>
         </div>
       </div>
-      <!-- Status Dot -->
+
       <div style="
         position: absolute; 
         top: -4px; 
@@ -129,7 +125,7 @@ const createMarkerElement = (bus) => {
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         ${pulseAnimation}
       "></div>
-      <!-- Pin Shadow -->
+
       <div style="
         width: 10px;
         height: 4px;
@@ -143,7 +139,7 @@ const createMarkerElement = (bus) => {
   return el;
 };
 
-// Helper to create popup content
+
 const createPopupContent = (bus, t) => {
   const statusClass = bus.status === "Completed"
     ? "completed"
@@ -206,7 +202,7 @@ const createPopupContent = (bus, t) => {
   `;
 };
 
-// Sub-component: StatsCard
+
 const StatsCard = ({ title, value, change, changeType, icon: Icon, bgColor }) => (
   <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-3 h-full">
     <div
@@ -238,20 +234,20 @@ export default function Dashboard() {
   const [buses, setBuses] = useState([]);
   const [isReady, setIsReady] = useState(false);
 
-  // 1. ดึง State และ Actions จาก Store
+
   const { filters, data, setFilter } = useDashboardStore();
 
-  // 2. Derived State (คำนวณข้อมูลที่จะแสดงผลตาม Filter)
+
   const currentBarData = data.barChart[filters.company] || data.barChart.all;
   const currentPieData = data.pieChart[filters.company] || data.pieChart.all;
 
-  // Generate passengers data based on revenue (rough estimate: 30 baht per passenger)
+
   const enrichedBarData = currentBarData.map(item => ({
     ...item,
     passengers: Math.floor(item.value / 30) + Math.floor(Math.random() * 20),
   }));
 
-  // Translate route keys to display names for charts - shorten names
+
   const translatedBarData = enrichedBarData.map(item => {
     const fullName = t(`routes.${item.name}`);
     // Shorten route names for better display
@@ -267,27 +263,27 @@ export default function Dashboard() {
     ? translatedBarData
     : translatedBarData.filter(item => enrichedBarData.find(d => d.name === filters.route && t(`routes.${d.name}`).includes(item.name.replace('...', ''))));
 
-  // Filter table data based on company and route
+
   const filteredTableData = data.transactions.filter(row => {
     const companyMatch = filters.company === "all" || row.company === filters.company;
     const routeMatch = filters.route === "all" || row.route === filters.route;
     return companyMatch && routeMatch;
   });
 
-  // Filter buses based on filters
+
   const filteredBuses = buses.filter((bus) => {
     const companyMatch = filters.company === "all" || bus.company === filters.company;
     const routeMatch = filters.route === "all" || bus.route === filters.route || filters.route === t(`routes.${bus.route}`);
     return companyMatch && routeMatch;
   });
 
-  // Generate buses on mount
+
   useEffect(() => {
     setBuses(generateAllBuses());
     setIsReady(true);
   }, []);
 
-  // 3. Table Column Config
+
   const tableColumns = [
     { header: t('table.id'), accessor: "id" },
     {
@@ -321,7 +317,7 @@ export default function Dashboard() {
     },
   ];
 
-  // Helper for Pie Label
+
   const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -335,7 +331,7 @@ export default function Dashboard() {
     );
   };
 
-  // Initialize map with Bangkok as default center
+
   useEffect(() => {
     if (map.current || !isReady) return;
 
@@ -357,7 +353,7 @@ export default function Dashboard() {
     };
   }, [isReady]);
 
-  // Pan to selected company location when filter changes
+
   useEffect(() => {
     if (!map.current) return;
 
@@ -378,7 +374,7 @@ export default function Dashboard() {
     }
   }, [filters.company]);
 
-  // Update markers when filters change
+
   useEffect(() => {
     if (!map.current) return;
 
@@ -438,7 +434,7 @@ export default function Dashboard() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-1">{t('dashboard.title')}</h1>
         <p className="text-sm text-gray-600 mb-4">{t('dashboard.subtitle')}</p>
 
-        {/* Filters: เชื่อมต่อกับ Store Actions */}
+
         <DashboardFilters
           company={filters.company}
           onCompanyChange={(val) => setFilter('company', val)}
@@ -449,7 +445,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Stats Cards: Map ข้อมูลจาก Store */}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {data.stats.map((stat, index) => (
           <StatsCard
@@ -464,7 +460,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Chart Section */}
+
       <div className="bg-white rounded-lg p-6 shadow-sm mb-6" style={{ height: "420px" }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">
@@ -590,7 +586,7 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Bus Map */}
+
       <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
         <h2 className="text-lg font-bold mb-4">{t("dashboard.bus_map_title")}</h2>
         <div
@@ -616,7 +612,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Data Table */}
+
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">{t('dashboard.recent_transactions')}</h2>
         <DataTable data={filteredTableData} columns={tableColumns} itemsPerPage={5} />
