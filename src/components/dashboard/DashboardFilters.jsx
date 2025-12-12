@@ -202,28 +202,6 @@ export default function DashboardFilters({
                         <span className="text-sm font-medium">{t('filters.label')}</span>
                     </div>
 
-                    {/* Company Filter */}
-                    <select
-                        value={company}
-                        onChange={(e) => onCompanyChange(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
-                    >
-                        <option value="all">{t('filters.all_companies')}</option>
-                        {availableCompanies.length > 0 ? (
-                            availableCompanies.map((companyId) => (
-                                <option key={companyId} value={companyId}>
-                                    {t(`companies.company_${companyId}`)}
-                                </option>
-                            ))
-                        ) : (
-                            <>
-                                <option value="1">{t('companies.company_1')}</option>
-                                <option value="2">{t('companies.company_2')}</option>
-                                <option value="3">{t('companies.company_3')}</option>
-                            </>
-                        )}
-                    </select>
-
                     {/* Date Range Filter */}
                     <div className="relative flex-1 sm:flex-initial">
                         <select
@@ -243,31 +221,17 @@ export default function DashboardFilters({
                         </select>
                     </div>
 
-                    {/* Route Filter - Dynamic based on company */}
-                    {(() => {
-                        const companyRoutes = {
-                            company_a: ["route_r1", "route_r3", "route_b1"],
-                            company_b: ["route_515", "route_140", "route_511", "route_29", "route_504"],
-                            company_c: ["route_kk_red", "route_kk_blue", "route_kk_songthaew8"],
-                        };
-                        const allRoutes = [...companyRoutes.company_a, ...companyRoutes.company_b, ...companyRoutes.company_c];
-                        const routesToShow = company === "all" ? allRoutes : (companyRoutes[company] || []);
-
-                        return (
-                            <select
-                                value={route}
-                                onChange={(e) => onRouteChange(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
-                            >
-                                <option value="all">{t('filters.all_routes')}</option>
-                                {routesToShow.map((routeKey) => (
-                                    <option key={routeKey} value={routeKey}>
-                                        {t(`routes.${routeKey}`)}
-                                    </option>
-                                ))}
-                            </select>
-                        );
-                    })()}
+                    {/* Route Filter */}
+                    <select
+                        value={route}
+                        onChange={(e) => onRouteChange(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
+                    >
+                        <option value="all">{t('filters.all_routes')}</option>
+                        <option value="route_r1">{t('routes.route_r1')}</option>
+                        <option value="route_r3">{t('routes.route_r3')}</option>
+                        <option value="route_b1">{t('routes.route_b1')}</option>
+                    </select>
 
                     {/* Bus ID Filter */}
                     <select
