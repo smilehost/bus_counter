@@ -22,15 +22,17 @@ const ACCENT_COLOR = "#FFA726";
 
 
 const COMPANY_LOCATIONS = {
-  company_a: { lat: 18.7883, lng: 98.9853, name: "Chiang Mai" },
-  company_b: { lat: 13.7563, lng: 100.5018, name: "Bangkok" },
-  company_c: { lat: 16.4419, lng: 102.8360, name: "Khon Kaen" },
+  1: { lat: 18.7883, lng: 98.9853, name: "Chiang Mai" },
+  2: { lat: 13.7563, lng: 100.5018, name: "Bangkok" },
+  3: { lat: 16.4419, lng: 102.8360, name: "Khon Kaen" },
 };
+
 const generateAllBuses = () => {
+  // Legacy mock data generator - keeping structure but likely unused
   const companyRoutes = {
-    company_a: ["route_r1", "route_r3", "route_b1"],
-    company_b: ["route_515", "route_140", "route_511", "route_29", "route_504"],
-    company_c: ["route_kk_red", "route_kk_blue", "route_kk_songthaew8"],
+    1: ["route_r1", "route_r3", "route_b1"],
+    2: ["route_515", "route_140", "route_511", "route_29", "route_504"],
+    3: ["route_kk_red", "route_kk_blue", "route_kk_songthaew8"],
   };
   const statuses = ["In Progress", "Completed", "Scheduled"];
   const buses = [];
@@ -50,7 +52,7 @@ const generateAllBuses = () => {
         buses.push({
           id: id++,
           route: route,
-          company,
+          company, // now numeric string or int
           lat: location.lat + latOffset,
           lng: location.lng + lngOffset,
           passengers: Math.floor(Math.random() * 50) + 10,
@@ -63,18 +65,21 @@ const generateAllBuses = () => {
   return buses;
 };
 
+// Create custom marker element
 const createMarkerElement = (bus) => {
   const el = document.createElement("div");
-  el.style.cssText = "cursor: pointer; transition: transform 0.2s ease; width: 40px; height: 50px;";
-
+  el.className = "bus-marker-container";
+  el.style.cssText = "cursor: pointer; transition: all 0.2s ease;";
 
   const companyColors = {
-    company_a: { bg: "linear-gradient(180deg, #E91E63 0%, #C2185B 100%)", shadow: "rgba(233, 30, 99, 0.5)" },
-    company_b: { bg: "linear-gradient(180deg, #2196F3 0%, #1565C0 100%)", shadow: "rgba(33, 150, 243, 0.5)" },
-    company_c: { bg: "linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%)", shadow: "rgba(76, 175, 80, 0.5)" },
+    1: { bg: "linear-gradient(180deg, #E91E63 0%, #C2185B 100%)", shadow: "rgba(233, 30, 99, 0.5)", hex: "#E91E63" },
+    2: { bg: "linear-gradient(180deg, #2196F3 0%, #1565C0 100%)", shadow: "rgba(33, 150, 243, 0.5)", hex: "#2196F3" },
+    3: { bg: "linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%)", shadow: "rgba(76, 175, 80, 0.5)", hex: "#4CAF50" },
   };
 
-  const colors = companyColors[bus.company] || companyColors.company_b;
+  // Safe lookup: try companyId first, then company (for legacy/mock)
+  const lookupId = bus.companyId || bus.company;
+  const colors = companyColors[lookupId] || companyColors[2];
 
   const statusColor = bus.status === "Completed"
     ? "#4CAF50"
@@ -84,9 +89,9 @@ const createMarkerElement = (bus) => {
 
   const pulseAnimation = bus.status === "In Progress" ? "animation: pulse 1.5s infinite;" : "";
 
-  el.innerHTML = `
-    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
-
+  // Detailed View (Pin)
+  const detailedView = `
+    <div class="marker-detailed" style="position: relative; display: flex; flex-direction: column; align-items: center;">
       <div style="
         width: 40px; 
         height: 40px; 
@@ -99,7 +104,6 @@ const createMarkerElement = (bus) => {
         box-shadow: 0 4px 15px ${colors.shadow};
         border: 3px solid white;
       ">
-
         <div style="transform: rotate(45deg);">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 6v6"></path>
@@ -112,7 +116,6 @@ const createMarkerElement = (bus) => {
           </svg>
         </div>
       </div>
-
       <div style="
         position: absolute; 
         top: -4px; 
@@ -125,7 +128,6 @@ const createMarkerElement = (bus) => {
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         ${pulseAnimation}
       "></div>
-
       <div style="
         width: 10px;
         height: 4px;
@@ -136,6 +138,32 @@ const createMarkerElement = (bus) => {
     </div>
   `;
 
+  // Simple View (Dot)
+  const simpleView = `
+    <div class="marker-dot" style="display: none; position: relative;">
+      <div style="
+        width: 12px;
+        height: 12px;
+        background: ${colors.hex};
+        border: 2px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      "></div>
+       <div style="
+        position: absolute; 
+        top: -2px; 
+        right: -2px; 
+        width: 8px; 
+        height: 8px; 
+        border-radius: 50%; 
+        border: 1px solid white; 
+        background-color: ${statusColor};
+        ${pulseAnimation}
+      "></div>
+    </div>
+  `;
+
+  el.innerHTML = detailedView + simpleView;
   return el;
 };
 
@@ -374,8 +402,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (map.current || !isReady) return;
 
-    // Default to Bangkok or first filtered bus location
-    const defaultCenter = COMPANY_LOCATIONS.company_b; // Bangkok
+    // Default to Bangkok (ID 2) or use current company filter
+    const defaultCenter = COMPANY_LOCATIONS[filters.company] || COMPANY_LOCATIONS[2];
+
+    if (!defaultCenter) return; // Prevention against undefined
 
     map.current = new maptilersdk.Map({
       container: mapContainer.current,
@@ -401,17 +431,20 @@ export default function Dashboard() {
   useEffect(() => {
     if (!map.current) return;
 
-    if (filters.company !== "all" && COMPANY_LOCATIONS[filters.company]) {
-      const location = COMPANY_LOCATIONS[filters.company];
+    const companyId = filters.company;
+
+    if (companyId && companyId !== "all" && COMPANY_LOCATIONS[companyId]) {
+      const location = COMPANY_LOCATIONS[companyId];
       map.current.flyTo({
         center: [location.lng, location.lat],
         zoom: 12,
         duration: 1500,
       });
     } else {
-      // When "all" is selected, show Thailand overview
+      // Fallback or "all" view (though "all" is effectively removed)
+      // Center of Thailand
       map.current.flyTo({
-        center: [100.5018, 15.8700], // Center of Thailand
+        center: [100.5018, 15.8700],
         zoom: 5.5,
         duration: 1500,
       });
@@ -421,6 +454,106 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!map.current) return;
+
+    // Create custom marker element
+    const createMarkerElement = (bus) => {
+      const el = document.createElement("div");
+      el.className = "bus-marker-container";
+      el.style.cssText = "cursor: pointer; transition: all 0.2s ease;";
+
+      const companyColors = {
+        company_a: { bg: "linear-gradient(180deg, #E91E63 0%, #C2185B 100%)", shadow: "rgba(233, 30, 99, 0.5)", hex: "#E91E63" },
+        company_b: { bg: "linear-gradient(180deg, #2196F3 0%, #1565C0 100%)", shadow: "rgba(33, 150, 243, 0.5)", hex: "#2196F3" },
+        company_c: { bg: "linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%)", shadow: "rgba(76, 175, 80, 0.5)", hex: "#4CAF50" },
+      };
+
+      const colors = companyColors[bus.company] || companyColors.company_b;
+
+      const statusColor = bus.status === "Completed"
+        ? "#4CAF50"
+        : bus.status === "In Progress"
+          ? "#FF9800"
+          : "#9E9E9E";
+
+      const pulseAnimation = bus.status === "In Progress" ? "animation: pulse 1.5s infinite;" : "";
+
+      // Detailed View (Pin)
+      const detailedView = `
+        <div class="marker-detailed" style="position: relative; display: flex; flex-direction: column; align-items: center;">
+          <div style="
+            width: 40px; 
+            height: 40px; 
+            background: ${colors.bg}; 
+            border-radius: 50% 50% 50% 0; 
+            transform: rotate(-45deg);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 4px 15px ${colors.shadow};
+            border: 3px solid white;
+          ">
+            <div style="transform: rotate(45deg);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 6v6"></path>
+                <path d="M15 6v6"></path>
+                <path d="M2 12h19.6"></path>
+                <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"></path>
+                <circle cx="7" cy="18" r="2"></circle>
+                <path d="M9 18h5"></path>
+                <circle cx="16" cy="18" r="2"></circle>
+              </svg>
+            </div>
+          </div>
+          <div style="
+            position: absolute; 
+            top: -4px; 
+            right: -4px; 
+            width: 14px; 
+            height: 14px; 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            background-color: ${statusColor};
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            ${pulseAnimation}
+          "></div>
+          <div style="
+            width: 10px;
+            height: 4px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            margin-top: 2px;
+          "></div>
+        </div>
+      `;
+
+      // Simple View (Dot)
+      const simpleView = `
+        <div class="marker-dot" style="display: none; position: relative;">
+          <div style="
+            width: 12px;
+            height: 12px;
+            background: ${colors.hex};
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          "></div>
+           <div style="
+            position: absolute; 
+            top: -2px; 
+            right: -2px; 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 50%; 
+            border: 1px solid white; 
+            background-color: ${statusColor};
+            ${pulseAnimation}
+          "></div>
+        </div>
+      `;
+
+      el.innerHTML = detailedView + simpleView;
+      return el;
+    };
 
     const updateMarkers = () => {
       // Remove existing markers
@@ -458,9 +591,43 @@ export default function Dashboard() {
 
     if (map.current.loaded()) {
       updateMarkers();
+      // Initial zoom check
+      const currentZoom = map.current.getZoom();
+      if (currentZoom < 12) {
+        mapContainer.current.classList.add('map-low-zoom');
+      } else {
+        mapContainer.current.classList.remove('map-low-zoom');
+      }
     } else {
-      map.current.on("load", updateMarkers);
+      map.current.on("load", () => {
+        updateMarkers();
+        // Initial zoom check on load
+        const currentZoom = map.current.getZoom();
+        if (currentZoom < 12) {
+          mapContainer.current.classList.add('map-low-zoom');
+        }
+      });
     }
+
+    // Zoom listener for marker switching
+    const onZoom = () => {
+      const zoom = map.current.getZoom();
+      if (zoom < 12) {
+        mapContainer.current.classList.add('map-low-zoom');
+      } else {
+        mapContainer.current.classList.remove('map-low-zoom');
+      }
+    };
+
+    map.current.on('zoom', onZoom);
+
+    // Cleanup zoom listener specifically for this effect to avoid duplicates if re-run
+    return () => {
+      if (map.current) {
+        map.current.off('zoom', onZoom);
+      }
+    };
+
   }, [filteredBuses, t]);
 
   // Fullscreen toggle handler
@@ -812,6 +979,22 @@ export default function Dashboard() {
         </div>
       </div>
 
+
+      {/* Map Styles for Zoom Levels */}
+      <style>
+        {`
+          .map-low-zoom .marker-detailed {
+            display: none !important;
+          }
+          .map-low-zoom .marker-dot {
+            display: block !important;
+          }
+          .bus-marker-container:hover .marker-dot {
+            transform: scale(1.2);
+            transition: transform 0.2s;
+          }
+        `}
+      </style>
 
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">{t('dashboard.recent_transactions')}</h2>
