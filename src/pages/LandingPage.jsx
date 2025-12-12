@@ -73,73 +73,37 @@ function WebsiteCard({ website, onClick }) {
             onClick={() => onClick(website)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            className="bg-white rounded-xl p-6 md:p-8 min-h-[180px] cursor-pointer flex flex-col transition-all duration-300 relative overflow-hidden"
             style={{
-                background: "#ffffff",
-                borderRadius: "12px",
-                padding: "32px",
-                minHeight: "180px",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
                 transform: isHovered ? "translateY(-6px)" : "translateY(0)",
                 boxShadow: isHovered
                     ? "0 16px 48px rgba(0, 0, 0, 0.12)"
                     : "0 2px 16px rgba(0, 0, 0, 0.06)",
                 borderLeft: `4px solid ${website.color}`,
-                display: "flex",
-                flexDirection: "column",
             }}
         >
             {/* Title */}
-            <h3
-                style={{
-                    fontSize: "22px",
-                    fontWeight: "700",
-                    margin: "0 0 12px 0",
-                    color: "#111827",
-                    letterSpacing: "-0.3px",
-                }}
-            >
+            <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-900 tracking-tight">
                 {website.name}
             </h3>
 
             {/* Description */}
-            <p
-                style={{
-                    color: "#6b7280",
-                    lineHeight: "1.6",
-                    fontSize: "15px",
-                    margin: "0",
-                    flex: 1,
-                }}
-            >
+            <p className="text-gray-500 leading-relaxed text-sm md:text-[15px] mb-0 flex-1">
                 {website.description}
             </p>
 
             {/* Divider */}
-            <div
-                style={{
-                    height: "1px",
-                    background: "#f3f4f6",
-                    margin: "20px 0 16px 0",
-                }}
-            />
+            <div className="h-px bg-gray-100 my-5" />
 
             {/* CTA Link */}
             <div
-                style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: website.color,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    transition: "gap 0.2s ease",
-                }}
+                className="text-sm font-semibold flex items-center gap-1.5 transition-all duration-200"
+                style={{ color: website.color }}
             >
                 <span>เข้าใช้งาน</span>
                 <span
+                    className="transition-transform duration-200"
                     style={{
-                        transition: "transform 0.2s ease",
                         transform: isHovered ? "translateX(4px)" : "translateX(0)",
                     }}
                 >
@@ -157,146 +121,49 @@ function WebsiteModal({ website, onClose, onGo }) {
     return (
         <div
             onClick={onClose}
-            style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: "rgba(0, 0, 0, 0.8)",
-                backdropFilter: "blur(8px)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000,
-                animation: "fadeIn 0.3s ease",
-            }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-[fadeIn_0.3s_ease]"
+            style={{ padding: '0 20px' }}
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                    background: "#ffffff",
-                    borderRadius: "16px",
-                    padding: "40px",
-                    maxWidth: "440px",
-                    width: "90%",
-                    border: "1px solid #e5e7eb",
-                    boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
-                    animation: "slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                    position: "relative",
-                }}
+                className="bg-white rounded-2xl p-6 md:p-10 w-full max-w-md relative shadow-2xl animate-[slideUp_0.4s_cubic-bezier(0.4,0,0.2,1)]"
             >
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    style={{
-                        position: "absolute",
-                        top: "16px",
-                        right: "16px",
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                        background: "#ffffff",
-                        color: "#6b7280",
-                        fontSize: "18px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                        e.target.style.background = "#f3f4f6";
-                        e.target.style.color = "#1f2937";
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.background = "#ffffff";
-                        e.target.style.color = "#6b7280";
-                    }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center justify-center transition-all"
                 >
                     ×
                 </button>
 
                 {/* Title */}
-                <h2
-                    style={{
-                        fontSize: "24px",
-                        fontWeight: "700",
-                        marginBottom: "12px",
-                        color: "#1f2937",
-                    }}
-                >
+                <h2 className="text-2xl font-bold mb-3 text-gray-900">
                     {website.name}
                 </h2>
 
                 {/* Description */}
-                <p
-                    style={{
-                        color: "#6b7280",
-                        lineHeight: "1.7",
-                        fontSize: "15px",
-                        marginBottom: "28px",
-                    }}
-                >
+                <p className="text-gray-500 leading-relaxed text-sm md:text-[15px] mb-7">
                     {website.description}
                 </p>
 
                 {/* Buttons */}
-                <div style={{ display: "flex", gap: "12px" }}>
+                <div className="flex gap-3">
                     <button
                         onClick={onClose}
-                        style={{
-                            flex: 1,
-                            padding: "14px 20px",
-                            background: "#ffffff",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "10px",
-                            color: "#374151",
-                            fontSize: "15px",
-                            fontWeight: "600",
-                            cursor: "pointer",
-                            transition: "all 0.2s",
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.background = "#f9fafb";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.background = "#ffffff";
-                        }}
+                        className="flex-1 py-3.5 px-5 bg-white border border-gray-200 rounded-xl text-gray-700 font-semibold text-sm md:text-[15px] hover:bg-gray-50 transition-all"
                     >
                         ยกเลิก
                     </button>
                     <button
                         onClick={() => onGo(website)}
+                        className="flex-1 py-3.5 px-6 rounded-xl text-white font-semibold text-base shadow-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
                         style={{
-                            flex: 1,
-                            padding: "16px 24px",
                             background: website.gradient,
-                            border: "none",
-                            borderRadius: "14px",
-                            color: "white",
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            cursor: "pointer",
                             boxShadow: `0 8px 25px ${website.color}50`,
-                            transition: "all 0.3s",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.transform = "scale(1.02)";
-                            e.target.style.boxShadow = `0 12px 35px ${website.color}60`;
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.transform = "scale(1)";
-                            e.target.style.boxShadow = `0 8px 25px ${website.color}50`;
                         }}
                     >
                         <span>Go</span>
-                        <span style={{ fontSize: "18px" }}>→</span>
+                        <span className="text-lg">→</span>
                     </button>
                 </div>
             </div>
@@ -326,13 +193,9 @@ export default function LandingPage() {
 
     return (
         <div
+            className="min-h-screen relative overflow-hidden font-sans text-white"
             style={{
-                minHeight: "100vh",
                 background: "linear-gradient(135deg, #0052CC 0%, #1E88E5 50%, #00BCD4 100%)",
-                color: "white",
-                fontFamily: "'Inter', sans-serif",
-                position: "relative",
-                overflow: "hidden",
             }}
         >
             {/* CSS Animations */}
@@ -352,102 +215,40 @@ export default function LandingPage() {
                             transform: translateY(0) scale(1);
                         }
                     }
-                    @keyframes float {
-                        0%, 100% { transform: translateY(0) rotate(0deg); }
-                        50% { transform: translateY(-20px) rotate(5deg); }
-                    }
                     @keyframes pulse {
                         0%, 100% { opacity: 0.4; transform: scale(1); }
                         50% { opacity: 0.6; transform: scale(1.05); }
-                    }
-                    @keyframes shimmer {
-                        0% { background-position: -200% 0; }
-                        100% { background-position: 200% 0; }
-                    }
-                    @keyframes glow {
-                        0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-                        50% { box-shadow: 0 0 40px rgba(255,255,255,0.2); }
                     }
                 `}
             </style>
 
             {/* Background decorations */}
             <div
-                style={{
-                    position: "absolute",
-                    top: "10%",
-                    left: "5%",
-                    width: "400px",
-                    height: "400px",
-                    background: "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)",
-                    borderRadius: "50%",
-                    opacity: 0.05,
-                    filter: "blur(100px)",
-                    animation: "pulse 8s infinite",
-                    pointerEvents: "none",
-                }}
+                className="absolute top-[10%] left-[5%] w-[300px] h-[300px] md:w-[400px] md:h-[400px] rounded-full opacity-5 blur-[100px] pointer-events-none animate-[pulse_8s_infinite]"
+                style={{ background: "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)" }}
             />
             <div
-                style={{
-                    position: "absolute",
-                    bottom: "10%",
-                    right: "5%",
-                    width: "500px",
-                    height: "500px",
-                    background: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
-                    borderRadius: "50%",
-                    opacity: 0.05,
-                    filter: "blur(100px)",
-                    animation: "pulse 10s infinite 2s",
-                    pointerEvents: "none",
-                }}
+                className="absolute bottom-[10%] right-[5%] w-[350px] h-[350px] md:w-[500px] md:h-[500px] rounded-full opacity-5 blur-[100px] pointer-events-none animate-[pulse_10s_infinite_2s]"
+                style={{ background: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)" }}
             />
 
             {/* Navigation */}
-            <nav
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "20px 48px",
-                    maxWidth: "1400px",
-                    margin: "0 auto",
-                    position: "relative",
-                }}
-            >
+            <nav className="flex justify-between items-center px-6 py-5 md:px-12 md:py-6 max-w-[1400px] mx-auto relative z-10">
                 {/* Logo */}
                 <div>
-                    <span
-                        style={{
-                            fontSize: "32px",
-                            fontWeight: "800",
-                            color: "#ffffff",
-                            letterSpacing: "-0.5px",
-                        }}
-                    >
+                    <span className="text-2xl md:text-[32px] font-extrabold tracking-tight">
                         Bussing Center
                     </span>
-                    <div style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.7)", marginTop: "4px", letterSpacing: "0.5px" }}>
+                    <div className="text-xs md:text-[13px] text-white/70 mt-1 tracking-wide">
                         Transportation Solutions
                     </div>
                 </div>
 
                 {/* Contact */}
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div className="flex items-center gap-4">
                     <a
                         href="#contact"
-                        style={{
-                            color: "#ffffff",
-                            textDecoration: "none",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            padding: "10px 20px",
-                            background: "rgba(255, 255, 255, 0.1)",
-                            borderRadius: "10px",
-                            border: "1px solid rgba(255, 255, 255, 0.15)",
-                            backdropFilter: "blur(10px)",
-                            transition: "all 0.3s ease",
-                        }}
+                        className="text-white text-sm font-medium px-4 py-2.5 md:px-5 md:py-2.5 bg-white/10 rounded-xl border border-white/15 backdrop-blur-md hover:bg-white/20 transition-all"
                     >
                         ติดต่อเรา
                     </a>
@@ -455,84 +256,25 @@ export default function LandingPage() {
             </nav>
 
             {/* Hero Section */}
-            <section
-                style={{
-                    maxWidth: "1200px",
-                    margin: "0 auto",
-                    padding: "40px 48px 32px",
-                    textAlign: "center",
-                    position: "relative",
-                }}
-            >
+            <section className="max-w-[1200px] mx-auto px-6 py-10 md:px-12 md:py-12 text-center relative z-10">
                 {/* Badge */}
-                <div
-                    style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "8px 18px",
-                        borderRadius: "50px",
-                        marginBottom: "24px",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                        color: "#ffffff",
-                        background: "rgba(255, 255, 255, 0.1)",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        backdropFilter: "blur(10px)",
-                    }}
-                >
-                    <span style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        background: "#22c55e",
-                        animation: "pulse 2s infinite",
-                    }} />
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-[13px] font-medium text-white bg-white/10 border border-white/15 backdrop-blur-md">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                     <span>ระบบบริหารจัดการขนส่งครบวงจร</span>
                 </div>
 
-                <h1
-                    style={{
-                        fontSize: "44px",
-                        fontWeight: "800",
-                        lineHeight: "1.15",
-                        marginBottom: "16px",
-                        color: "#ffffff",
-                        letterSpacing: "-1px",
-                    }}
-                >
+                <h1 className="text-3xl md:text-[44px] font-extrabold leading-tight mb-4 tracking-tight">
                     เลือกระบบที่ต้องการใช้งาน
                 </h1>
 
-                <p
-                    style={{
-                        fontSize: "17px",
-                        color: "rgba(255, 255, 255, 0.85)",
-                        lineHeight: "1.6",
-                        maxWidth: "520px",
-                        margin: "0 auto",
-                    }}
-                >
+                <p className="text-base md:text-[17px] text-white/85 leading-relaxed max-w-[520px] mx-auto">
                     รวมทุกระบบบริหารจัดการขนส่งของบริษัทไว้ในที่เดียว เข้าถึงง่าย ใช้งานสะดวก
                 </p>
             </section>
 
             {/* Website Cards Grid */}
-            <section
-                style={{
-                    maxWidth: "1280px",
-                    margin: "0 auto",
-                    padding: "16px 48px 80px",
-                    position: "relative",
-                }}
-            >
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-                        gap: "24px",
-                    }}
-                >
+            <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-20 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {companyWebsites.map((website) => (
                         <WebsiteCard
                             key={website.id}
@@ -544,18 +286,8 @@ export default function LandingPage() {
             </section>
 
             {/* Footer */}
-            <footer
-                style={{
-                    borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-                    padding: "28px 48px",
-                    textAlign: "center",
-                    color: "rgba(255, 255, 255, 0.6)",
-                    fontSize: "13px",
-                    position: "relative",
-                    background: "rgba(0, 0, 0, 0.1)",
-                }}
-            >
-                <p>© 2024 SmileHost Transportation Solutions. All rights reserved.</p>
+            <footer className="border-t border-white/10 py-7 px-6 md:px-12 text-center text-white/60 text-[13px] relative z-10 bg-black/10">
+                <p>© {new Date().getFullYear()} SmileHost Transportation Solutions. All rights reserved.</p>
             </footer>
 
             {/* Modal */}

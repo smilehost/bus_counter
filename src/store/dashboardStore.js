@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Users, Bus, Map } from "lucide-react";
+import { getAllCounters } from "../services/counterService";
 
 // --- Route Keys for each company ---
 const COMPANY_ROUTES = {
@@ -106,6 +107,7 @@ export const useDashboardStore = create((set, get) => ({
     company: "all",
     dateRange: "today",
     route: "all",
+    busId: "all",
     chartType: "bar", // 'bar' | 'pie'
   },
 
@@ -116,6 +118,11 @@ export const useDashboardStore = create((set, get) => ({
     stats: MOCK_DATA.stats,
     transactions: MOCK_DATA.tableData,
   },
+
+  // 4. Buses/Counters State
+  buses: [],
+  busesLoading: false,
+  busesError: null,
 
   // --- Actions ---
 
@@ -131,8 +138,72 @@ export const useDashboardStore = create((set, get) => ({
 
   resetFilters: () =>
     set((state) => ({
-      filters: { ...state.filters, company: "all", route: "all", dateRange: "today" }
+      filters: { ...state.filters, company: "all", route: "all", busId: "all", dateRange: "today" }
     })),
+
+  // Fetch buses/counters from API
+  fetchBuses: async () => {
+    set({ busesLoading: true, busesError: null });
+    try {
+      const response = await getAllCounters();
+      const countersData = response.data || response;
+
+      // Transform counter data to bus format
+      const busesFromApi = countersData.map(counter => ({
+        id: counter.counter_bus_id,
+        counterId: counter.counter_id,
+        lat: parseFloat(counter.counter_lat),
+        lng: parseFloat(counter.counter_lng),
+        passengers: counter.counter_in_count - counter.counter_out_count,
+        inCount: counter.counter_in_count,
+        outCount: counter.counter_out_count,
+        cameraId: counter.counter_installed_camera_id,
+        companyId: counter.counter_com_id, // Store raw company ID for filtering
+        route: "route_r1", // Default route, can be updated when API provides route info
+        status: "In Progress",
+      }));
+
+      set({ buses: busesFromApi, busesLoading: false });
+    } catch (error) {
+      console.error('Error fetching counters:', error);
+      set({ busesError: error.message, busesLoading: false });
+    }
+  },
+
+  // Selector: Get filtered buses
+  getFilteredBuses: () => {
+    const state = get();
+    const { company, route, busId } = state.filters;
+
+    return state.buses.filter(bus => {
+      // Filter by company using companyId
+      const companyMatch = company === "all" || bus.companyId === parseInt(company);
+      const routeMatch = route === "all" || bus.route === route;
+      const busIdMatch = busId === "all" || bus.id === parseInt(busId);
+      return companyMatch && routeMatch && busIdMatch;
+    });
+  },
+
+  // Get unique company IDs from buses
+  getAvailableCompanies: () => {
+    const state = get();
+    const companyIds = [...new Set(state.buses.map(bus => bus.companyId))];
+    return companyIds.sort((a, b) => a - b);
+  },
+
+  // Get unique bus IDs (filtered by current company/route)
+  getAvailableBusIds: () => {
+    const state = get();
+    const { company, route } = state.filters;
+
+    const filteredBuses = state.buses.filter(bus => {
+      const companyMatch = company === "all" || bus.companyId === parseInt(company);
+      const routeMatch = route === "all" || bus.route === route;
+      return companyMatch && routeMatch;
+    });
+
+    return [...new Set(filteredBuses.map(bus => bus.id))].sort((a, b) => a - b);
+  },
 
   // Selector: Get filtered transactions
   getFilteredTransactions: () => {
