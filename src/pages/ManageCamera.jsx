@@ -7,6 +7,7 @@ import ReusableModal from "../components/modal";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Chip from '@mui/material/Chip';
 
 export default function ManageCamera() {
@@ -24,6 +25,9 @@ export default function ManageCamera() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false); // New State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState(null);
+
+  // State for Access Key visibility (hidden by default for security)
+  const [visibleAccessKeys, setVisibleAccessKeys] = useState({});
 
   useEffect(() => {
     fetchCameras();
@@ -76,6 +80,20 @@ export default function ManageCamera() {
     console.log("Deleting camera:", selectedCamera?.install_id);
     // TODO: Implement delete action in store
     setIsDeleteModalOpen(false);
+  };
+
+  // Toggle Access Key visibility
+  const toggleAccessKeyVisibility = (cameraId) => {
+    setVisibleAccessKeys(prev => ({
+      ...prev,
+      [cameraId]: !prev[cameraId]
+    }));
+  };
+
+  // Mask access key for security
+  const maskAccessKey = (key) => {
+    if (!key) return '***';
+    return '•'.repeat(Math.min(key.length, 12));
   };
 
   // Field Configs
@@ -306,9 +324,22 @@ export default function ManageCamera() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <code className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-mono border border-gray-200">
-                        {cam.installed_assces_key}
-                      </code>
+                      <div className="flex items-center gap-2">
+                        <code className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-mono border border-gray-200 min-w-[100px]">
+                          {visibleAccessKeys[cam.install_id]
+                            ? cam.installed_assces_key
+                            : maskAccessKey(cam.installed_assces_key)}
+                        </code>
+                        <button
+                          onClick={() => toggleAccessKeyVisibility(cam.install_id)}
+                          className="p-1 rounded hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
+                          title={visibleAccessKeys[cam.install_id] ? t('common.hide', 'Hide') : t('common.show', 'Show')}
+                        >
+                          {visibleAccessKeys[cam.install_id]
+                            ? <VisibilityOffIcon fontSize="small" />
+                            : <VisibilityIcon fontSize="small" />}
+                        </button>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${cam.installed_on_activate
@@ -321,9 +352,6 @@ export default function ManageCamera() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="tooltip" title="View Details">
-                          <CustomButton onlyIcon variant="ghost" size="sm" icon={<VisibilityIcon fontSize="small" className="text-gray-500 hover:text-blue-600" />} />
-                        </div>
                         <div className="tooltip" title="Edit">
                           <CustomButton onlyIcon variant="ghost" size="sm" onClick={() => handleEdit(cam)} icon={<EditIcon fontSize="small" className="text-gray-500 hover:text-amber-500" />} />
                         </div>
