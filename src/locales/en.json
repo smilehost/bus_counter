@@ -90,7 +90,8 @@
         "to": "to",
         "of": "of",
         "entries": "entries",
-        "per_page": "per page"
+        "per_page": "per page",
+        "rows_per_page": "Rows per page"
     },
     "companies": {
         "company_a": "Bussing Chiang Mai",

@@ -90,7 +90,8 @@
         "to": "ถึง",
         "of": "จาก",
         "entries": "รายการ",
-        "per_page": "ต่อหน้า"
+        "per_page": "ต่อหน้า",
+        "rows_per_page": "แถวต่อหน้า"
     },
     "companies": {
         "company_a": "บัสซิ่ง เชียงใหม่",

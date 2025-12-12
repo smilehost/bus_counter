@@ -2,9 +2,18 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 
-export default function DataTable({ data, columns, itemsPerPage = 10 }) {
+export default function DataTable({ data, columns, itemsPerPage: defaultItemsPerPage = 10 }) {
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
     const { t } = useTranslation();
+
+    const rowsPerPageOptions = [5, 10, 50, 100];
+
+    const handleRowsPerPageChange = (e) => {
+        const newItemsPerPage = parseInt(e.target.value);
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page when changing rows per page
+    };
 
     // Calculate pagination
     const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -81,9 +90,23 @@ export default function DataTable({ data, columns, itemsPerPage = 10 }) {
             </div>
 
             {/* Pagination */}
-            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                    {t('table.showing')} {startIndex + 1} {t('table.to')} {Math.min(endIndex, data.length)} {t('table.of')} {data.length} {t('table.entries')}
+            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm text-gray-600">{t('table.rows_per_page')}:</label>
+                        <select
+                            value={itemsPerPage}
+                            onChange={handleRowsPerPageChange}
+                            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            {rowsPerPageOptions.map(option => (
+                                <option key={option} value={option}>{option}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                        {t('table.showing')} {data.length > 0 ? startIndex + 1 : 0} {t('table.to')} {Math.min(endIndex, data.length)} {t('table.of')} {data.length} {t('table.entries')}
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -103,8 +126,8 @@ export default function DataTable({ data, columns, itemsPerPage = 10 }) {
                                 key={page}
                                 onClick={() => goToPage(page)}
                                 className={`px-3 py-1 rounded text-sm ${currentPage === page
-                                        ? 'bg-blue-500 text-white'
-                                        : 'hover:bg-gray-100 text-gray-700'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'hover:bg-gray-100 text-gray-700'
                                     }`}
                             >
                                 {page}

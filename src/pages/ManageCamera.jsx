@@ -9,6 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Chip from '@mui/material/Chip';
+import { SkeletonCard, SkeletonCameraTableRow } from "../components/Skeleton";
 
 export default function ManageCamera() {
   const { t } = useTranslation();
@@ -199,28 +200,37 @@ export default function ManageCamera() {
         </div>
       </div>
 
-      {/* Stats / Overview Cards (Optional - functionality placeholder) */}
+      {/* Stats / Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-          <div className="p-3 bg-blue-50 rounded-lg text-blue-600">
-            <Monitor size={24} />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Total Cameras</p>
-            <p className="text-2xl font-bold text-gray-800">{cameras.length}</p>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-          <div className="p-3 bg-green-50 rounded-lg text-green-600">
-            <div className="w-6 h-6 rounded-full border-2 border-green-500 animate-pulse bg-green-200"></div>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Active Now</p>
-            <p className="text-2xl font-bold text-gray-800">
-              {cameras.filter(c => c.installed_on_activate).length}
-            </p>
-          </div>
-        </div>
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+              <div className="p-3 bg-blue-50 rounded-lg text-blue-600">
+                <Monitor size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Cameras</p>
+                <p className="text-2xl font-bold text-gray-800">{cameras.length}</p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+              <div className="p-3 bg-green-50 rounded-lg text-green-600">
+                <div className="w-6 h-6 rounded-full border-2 border-green-500 animate-pulse bg-green-200"></div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Active Now</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {cameras.filter(c => c.installed_on_activate).length}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Control Bar: Search & Filter */}
@@ -269,14 +279,13 @@ export default function ManageCamera() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <RefreshCcw className="animate-spin text-blue-500" size={32} />
-                      <span>{t('common.loading', 'Loading data...')}</span>
-                    </div>
-                  </td>
-                </tr>
+                <>
+                  <SkeletonCameraTableRow />
+                  <SkeletonCameraTableRow />
+                  <SkeletonCameraTableRow />
+                  <SkeletonCameraTableRow />
+                  <SkeletonCameraTableRow />
+                </>
               ) : error ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-red-500 bg-red-50">

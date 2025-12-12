@@ -10,6 +10,7 @@ import "@maptiler/sdk/dist/maptiler-sdk.css";
 
 import DashboardFilters from "../components/dashboard/DashboardFilters";
 import DataTable from "../components/dashboard/DataTable";
+import { SkeletonCard, SkeletonChart, SkeletonMap, SkeletonTable } from "../components/Skeleton";
 
 
 import { useDashboardStore } from "../store/dashboardStore";
@@ -352,20 +353,43 @@ export default function Dashboard() {
 
 
   const tableColumns = [
-    { header: t('table.id'), accessor: "id" },
+    { header: t('table.id'), accessor: "counterId" },
     {
-      header: t('table.route'),
-      accessor: "route",
-      render: (row) => t(`routes.${row.route}`),
+      header: t('dashboard.bus'),
+      accessor: "id",
+      render: (row) => `#${row.id}`,
     },
     {
       header: t('table.company'),
-      accessor: "company",
-      render: (row) => t(`companies.${row.company}`),
+      accessor: "companyId",
+      render: (row) => t(`companies.company_${row.companyId}`),
     },
-    { header: t('table.passengers'), accessor: "passengers" },
-    { header: t('table.revenue'), accessor: "revenue" },
-    { header: t('table.time'), accessor: "time" },
+    {
+      header: t('dashboard.counter_in'),
+      accessor: "inCount",
+      render: (row) => (
+        <span className="text-green-600 font-medium">{row.inCount}</span>
+      ),
+    },
+    {
+      header: t('dashboard.counter_out'),
+      accessor: "outCount",
+      render: (row) => (
+        <span className="text-red-600 font-medium">{row.outCount}</span>
+      ),
+    },
+    {
+      header: t('table.passengers'),
+      accessor: "passengers",
+      render: (row) => (
+        <span className="font-semibold">{row.passengers}</span>
+      ),
+    },
+    {
+      header: t('table.camera'),
+      accessor: "cameraId",
+      render: (row) => `Camera ${row.cameraId}`,
+    },
     {
       header: t('table.status'),
       accessor: "status",
@@ -745,17 +769,25 @@ export default function Dashboard() {
 
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {data.stats.map((stat, index) => (
-          <StatsCard
-            key={index}
-            title={t(stat.translationKey)}
-            value={stat.value}
-            change={stat.change ? `${stat.change} ${t(stat.changeKey)}` : t(stat.changeKey)}
-            changeType={stat.changeType}
-            icon={stat.icon}
-            bgColor={stat.bgColor}
-          />
-        ))}
+        {busesLoading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          data.stats.map((stat, index) => (
+            <StatsCard
+              key={index}
+              title={t(stat.translationKey)}
+              value={stat.value}
+              change={stat.change ? `${stat.change} ${t(stat.changeKey)}` : t(stat.changeKey)}
+              changeType={stat.changeType}
+              icon={stat.icon}
+              bgColor={stat.bgColor}
+            />
+          ))
+        )}
       </div>
 
 
@@ -999,7 +1031,11 @@ export default function Dashboard() {
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">{t('dashboard.recent_transactions')}</h2>
         <div className="overflow-x-auto">
-          <DataTable data={filteredTableData} columns={tableColumns} itemsPerPage={5} />
+          {busesLoading ? (
+            <SkeletonTable rows={5} columns={8} />
+          ) : (
+            <DataTable data={filteredBuses} columns={tableColumns} itemsPerPage={5} />
+          )}
         </div>
       </div>
     </div>

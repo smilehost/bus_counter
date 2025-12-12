@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import CustomButton from "../components/CustomButto";
 import ReusableModal from "../components/modal";
+import { SkeletonBusCard } from "../components/Skeleton";
 
 export default function ManageBusDoor() {
   const { t } = useTranslation();
@@ -76,7 +77,12 @@ export default function ManageBusDoor() {
       {/* Bus Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
         {loading ? (
-          <div className="col-span-full flex justify-center py-12 text-gray-400">Loading buses...</div>
+          <>
+            <SkeletonBusCard />
+            <SkeletonBusCard />
+            <SkeletonBusCard />
+            <SkeletonBusCard />
+          </>
         ) : busList.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-400">
             <Bus size={48} className="mb-2 opacity-50" />
