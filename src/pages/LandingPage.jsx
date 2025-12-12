@@ -171,8 +171,45 @@ function WebsiteModal({ website, onClose, onGo }) {
     );
 }
 
+// Skeleton Card Component
+function SkeletonCard() {
+    return (
+        <div className="bg-white rounded-xl p-6 md:p-8 min-h-[180px] flex flex-col relative overflow-hidden">
+            {/* Shimmer Effect */}
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-gray-100/50 to-transparent" />
+
+            {/* Title Skeleton */}
+            <div className="h-7 w-2/3 bg-gray-200 rounded-md mb-4 animate-pulse" />
+
+            {/* Description Skeleton */}
+            <div className="space-y-2 mb-auto">
+                <div className="h-4 w-full bg-gray-100 rounded animate-pulse" />
+                <div className="h-4 w-5/6 bg-gray-100 rounded animate-pulse" />
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gray-100 my-5" />
+
+            {/* CTA Skeleton */}
+            <div className="flex items-center gap-2">
+                <div className="h-5 w-20 bg-gray-200 rounded animate-pulse" />
+                <div className="h-5 w-5 bg-gray-200 rounded animate-pulse" />
+            </div>
+        </div>
+    );
+}
+
 export default function LandingPage() {
     const [selectedWebsite, setSelectedWebsite] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // Simulate loading
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleCardClick = (website) => {
         setSelectedWebsite(website);
@@ -218,6 +255,9 @@ export default function LandingPage() {
                     @keyframes pulse {
                         0%, 100% { opacity: 0.4; transform: scale(1); }
                         50% { opacity: 0.6; transform: scale(1.05); }
+                    }
+                    @keyframes shimmer {
+                        100% { transform: translateX(100%); }
                     }
                 `}
             </style>
@@ -275,13 +315,19 @@ export default function LandingPage() {
             {/* Website Cards Grid */}
             <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-20 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {companyWebsites.map((website) => (
-                        <WebsiteCard
-                            key={website.id}
-                            website={website}
-                            onClick={handleCardClick}
-                        />
-                    ))}
+                    {loading ? (
+                        [...Array(6)].map((_, i) => (
+                            <SkeletonCard key={i} />
+                        ))
+                    ) : (
+                        companyWebsites.map((website) => (
+                            <WebsiteCard
+                                key={website.id}
+                                website={website}
+                                onClick={handleCardClick}
+                            />
+                        ))
+                    )}
                 </div>
             </section>
 

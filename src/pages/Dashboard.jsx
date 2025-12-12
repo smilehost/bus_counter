@@ -289,6 +289,14 @@ export default function Dashboard() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportStatus, setExportStatus] = useState('idle');
+  const [visibleTableData, setVisibleTableData] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const onPieEnter = useCallback((_, index) => {
     setActiveIndex(index);
@@ -344,14 +352,16 @@ export default function Dashboard() {
   // Get filtered buses from store
   const filteredBuses = getFilteredBuses();
 
-  // Handle Excel Export
+  // Handle Excel Export - exports only visible rows based on current pagination
   const handleExportExcel = useCallback(() => {
     setShowExportModal(true);
     setExportStatus('loading');
 
     setTimeout(() => {
       try {
-        const exportData = filteredBuses.map((bus, index) => ({
+        // Use visibleTableData (current page data) instead of all filteredBuses
+        const dataToExport = visibleTableData.length > 0 ? visibleTableData : filteredBuses;
+        const exportData = dataToExport.map((bus, index) => ({
           'No.': index + 1,
           'Counter ID': bus.counterId,
           'Bus ID': bus.id,
@@ -379,7 +389,7 @@ export default function Dashboard() {
         setExportStatus('error');
       }
     }, 500);
-  }, [filteredBuses]);
+  }, [visibleTableData, filteredBuses]);
 
   // Fetch bus counters from API via store
   useEffect(() => {
@@ -388,7 +398,7 @@ export default function Dashboard() {
       setIsReady(true);
     };
     loadBuses();
-  }, [fetchBuses]);
+  }, [fetchBuses, filters.dateRange, filters.customStartDate, filters.customEndDate]);
 
 
   const tableColumns = [
@@ -815,6 +825,9 @@ export default function Dashboard() {
           onRouteChange={(val) => setFilter('route', val)}
           busId={filters.busId}
           onBusIdChange={(val) => setFilter('busId', val)}
+          customStartDate={filters.customStartDate}
+          customEndDate={filters.customEndDate}
+          onCustomDateChange={(type, val) => setFilter(type === 'start' ? 'customStartDate' : 'customEndDate', val)}
           availableBusIds={getAvailableBusIds()}
           availableCompanies={getAvailableCompanies()}
         />
@@ -844,28 +857,30 @@ export default function Dashboard() {
       </div>
 
 
-      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm mb-6" style={{ height: "350px" }}>
-        <div className="flex items-center justify-between mb-4">
+      <div className={`bg-white rounded-lg p-4 sm:p-6 shadow-sm mb-6 ${isMobile && filters.chartType === 'pie' ? 'h-[480px]' : 'h-[350px]'}`}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4 sm:gap-0">
           <h2 className="text-lg font-bold">
             {filters.chartType === "bar" ? t('dashboard.revenue_by_route') : t('dashboard.transactions_by_payment')}
           </h2>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start sm:self-auto">
             <button
               onClick={() => setFilter('chartType', 'bar')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.chartType === "bar" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.chartType === "bar" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
             >
               <BarChart3 size={18} />
-              {t('dashboard.bar_chart')}
+              <span className="hidden sm:inline">{t('dashboard.bar_chart')}</span>
+              <span className="sm:hidden">Bar</span>
             </button>
             <button
               onClick={() => setFilter('chartType', 'pie')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.chartType === "pie" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.chartType === "pie" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
             >
               <PieChartIcon size={18} />
-              {t('dashboard.pie_chart')}
+              <span className="hidden sm:inline">{t('dashboard.pie_chart')}</span>
+              <span className="sm:hidden">Pie</span>
             </button>
           </div>
         </div>
@@ -938,10 +953,10 @@ export default function Dashboard() {
                 activeIndex={activeIndex}
                 activeShape={renderActiveShape}
                 data={filteredBarData}
-                cx="50%"
-                cy="45%"
-                innerRadius={55} // Increased slightly
-                outerRadius={100} // Reduced slightly for hover space
+                cx={isMobile ? "50%" : "35%"}
+                cy={isMobile ? "40%" : "50%"}
+                innerRadius={50}
+                outerRadius={90}
                 fill="#8884d8"
                 dataKey="value"
                 onMouseEnter={onPieEnter}
@@ -956,13 +971,27 @@ export default function Dashboard() {
                 formatter={(value, name, props) => [`฿${value.toLocaleString()}`, t(`routes.${props.payload.name}`)]}
               />
               <Legend
-                verticalAlign="bottom"
-                height={64}
+                layout={isMobile ? "horizontal" : "vertical"}
+                verticalAlign={isMobile ? "bottom" : "middle"}
+                align={isMobile ? "center" : "right"}
                 iconType="circle"
                 iconSize={8}
-                wrapperStyle={{ overflowY: 'auto' }}
+                wrapperStyle={isMobile ? {
+                  fontSize: '11px',
+                  bottom: 0,
+                  width: '100%',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  paddingTop: '20px'
+                } : {
+                  paddingLeft: 20,
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  fontSize: '12px'
+                }}
                 formatter={(value, entry) => (
-                  <span style={{ color: "#555", fontSize: "0.75rem", fontWeight: 500, marginLeft: 4 }}>
+                  <span style={{ color: "#555", fontSize: "0.75rem", fontWeight: 500, marginLeft: 4, marginRight: isMobile ? 8 : 0 }}>
                     {t(`routes.${entry.payload.name}`)}
                   </span>
                 )}
@@ -1099,7 +1128,7 @@ export default function Dashboard() {
           {busesLoading ? (
             <SkeletonTable rows={5} columns={8} />
           ) : (
-            <DataTable data={filteredBuses} columns={tableColumns} itemsPerPage={5} />
+            <DataTable data={filteredBuses} columns={tableColumns} itemsPerPage={5} onPagedDataChange={setVisibleTableData} />
           )}
         </div>
       </div>
@@ -1113,12 +1142,12 @@ export default function Dashboard() {
             type: 'info', name: 'status', label: 'Status', value: '⏳ Preparing your file...',
           } : exportStatus === 'success' ? {
             type: 'warning', name: 'success', variant: 'success', icon: '✅',
-            message: `Export สำเร็จ! ${filteredBuses.length} รายการ`,
+            message: `Export สำเร็จ! ${visibleTableData.length} รายการ`,
           } : exportStatus === 'error' ? {
             type: 'warning', name: 'error', variant: 'danger', icon: '❌',
             message: 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง',
           } : {
-            type: 'info', name: 'info', label: 'จำนวนข้อมูล', value: `${filteredBuses.length} รายการ`,
+            type: 'info', name: 'info', label: 'จำนวนข้อมูล', value: `${visibleTableData.length} รายการ (จากทั้งหมด ${filteredBuses.length})`,
           },
         ]}
         confirmText={exportStatus === 'success' ? 'Done' : undefined}

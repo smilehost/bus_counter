@@ -1,6 +1,15 @@
 import { create } from "zustand";
 import { Users, Bus, Map } from "lucide-react";
-import { getAllCounters } from "../services/counterService";
+import { getAllCounters, getCountersByDate, getCountersByDateRange } from "../services/counterService";
+
+// Helper to format date as YYYY-MM-DD
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  if (dateString.includes('T')) {
+    return dateString.split('T')[0];
+  }
+  return dateString;
+};
 
 // --- Route Keys for each company ---
 const COMPANY_ROUTES = {
@@ -106,6 +115,8 @@ export const useDashboardStore = create((set, get) => ({
   filters: {
     company: "all", // Default to all companies
     dateRange: "today",
+    customStartDate: new Date().toISOString().split('T')[0],
+    customEndDate: new Date().toISOString().split('T')[0],
     route: "all",
     busId: "all",
     chartType: "bar", // 'bar' | 'pie'
@@ -144,8 +155,26 @@ export const useDashboardStore = create((set, get) => ({
   // Fetch buses/counters from API
   fetchBuses: async () => {
     set({ busesLoading: true, busesError: null });
+    const { filters } = get();
+
     try {
-      const response = await getAllCounters();
+      let response;
+      const formattedStartDate = formatDate(filters.customStartDate);
+      const formattedEndDate = formatDate(filters.customEndDate);
+
+      if (filters.dateRange === 'single_day' && formattedStartDate) {
+        response = await getCountersByDate(formattedStartDate);
+      } else if ((filters.dateRange === 'custom' || filters.dateRange === 'today' || filters.dateRange === 'yesterday') && formattedStartDate && formattedEndDate) {
+        // If start == end, treat as single day
+        if (formattedStartDate === formattedEndDate) {
+          response = await getCountersByDate(formattedStartDate);
+        } else {
+          response = await getCountersByDateRange(formattedStartDate, formattedEndDate);
+        }
+      } else {
+        response = await getAllCounters();
+      }
+
       const countersData = response.data || response;
 
       // Transform counter data to bus format

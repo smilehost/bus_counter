@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 
-export default function DataTable({ data, columns, itemsPerPage: defaultItemsPerPage = 10 }) {
+export default function DataTable({ data, columns, itemsPerPage: defaultItemsPerPage = 10, onPagedDataChange }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
     const { t } = useTranslation();
+    const prevPageRef = useRef();
+    const prevItemsPerPageRef = useRef();
+    const prevDataLengthRef = useRef();
 
     const rowsPerPageOptions = [5, 10, 50, 100];
 
@@ -20,6 +23,20 @@ export default function DataTable({ data, columns, itemsPerPage: defaultItemsPer
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentData = data.slice(startIndex, endIndex);
+
+    // Notify parent about current visible data only when pagination changes
+    useEffect(() => {
+        if (onPagedDataChange && (
+            prevPageRef.current !== currentPage ||
+            prevItemsPerPageRef.current !== itemsPerPage ||
+            prevDataLengthRef.current !== data.length
+        )) {
+            prevPageRef.current = currentPage;
+            prevItemsPerPageRef.current = itemsPerPage;
+            prevDataLengthRef.current = data.length;
+            onPagedDataChange(data.slice(startIndex, endIndex));
+        }
+    }, [currentPage, itemsPerPage, data, startIndex, endIndex, onPagedDataChange]);
 
     const goToPage = (page) => {
         if (page >= 1 && page <= totalPages) {
