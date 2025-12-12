@@ -114,7 +114,7 @@ export const useDashboardStore = create((set, get) => ({
   // 2. Dashboard UI Filters
   filters: {
     company: "all", // Default to all companies
-    dateRange: "today",
+    dateRange: "all",
     customStartDate: new Date().toISOString().split('T')[0],
     customEndDate: new Date().toISOString().split('T')[0],
     route: "all",
@@ -149,7 +149,7 @@ export const useDashboardStore = create((set, get) => ({
 
   resetFilters: () =>
     set((state) => ({
-      filters: { ...state.filters, company: "all", route: "all", busId: "all", dateRange: "today" }
+      filters: { ...state.filters, company: "all", route: "all", busId: "all", dateRange: "all" }
     })),
 
   // Fetch buses/counters from API

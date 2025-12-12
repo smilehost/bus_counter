@@ -437,14 +437,14 @@ export default function Dashboard() {
     {
       header: t('table.camera'),
       accessor: "cameraId",
-      render: (row) => `Camera ${row.cameraId}`,
+      render: (row) => <span className="whitespace-nowrap">Camera {row.cameraId}</span>,
     },
     {
       header: t('table.status'),
       accessor: "status",
       render: (row) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "Completed" ? "bg-green-100 text-green-700"
+          className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${row.status === "Completed" ? "bg-green-100 text-green-700"
             : row.status === "In Progress" ? "bg-blue-100 text-blue-700"
               : "bg-gray-100 text-gray-700"
             }`}
