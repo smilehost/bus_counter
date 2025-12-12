@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip
 } from "recharts";
-import { BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { BarChart3, PieChart as PieChartIcon, Maximize2, Minimize2 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import * as maptilersdk from "@maptiler/sdk";
 import "@maptiler/sdk/dist/maptiler-sdk.css";
@@ -229,10 +229,12 @@ const StatsCard = ({ title, value, change, changeType, icon: Icon, bgColor }) =>
 export default function Dashboard() {
   const { t } = useTranslation();
   const mapContainer = useRef(null);
+  const mapWrapper = useRef(null);
   const map = useRef(null);
   const markers = useRef([]);
   const [buses, setBuses] = useState([]);
   const [isReady, setIsReady] = useState(false);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
 
   const { filters, data, setFilter } = useDashboardStore();
@@ -343,6 +345,11 @@ export default function Dashboard() {
       style: maptilersdk.MapStyle.STREETS,
       center: [defaultCenter.lng, defaultCenter.lat],
       zoom: 11,
+      scrollZoom: false,
+      doubleClickZoom: false,
+      dragRotate: false,
+      touchZoomRotate: false,
+      boxZoom: false,
     });
 
     return () => {
@@ -418,6 +425,55 @@ export default function Dashboard() {
       map.current.on("load", updateMarkers);
     }
   }, [filteredBuses, t]);
+
+  // Fullscreen toggle handler
+  const toggleMapFullscreen = useCallback(() => {
+    if (!mapWrapper.current) return;
+
+    if (!isMapFullscreen) {
+      if (mapWrapper.current.requestFullscreen) {
+        mapWrapper.current.requestFullscreen();
+      } else if (mapWrapper.current.webkitRequestFullscreen) {
+        mapWrapper.current.webkitRequestFullscreen();
+      } else if (mapWrapper.current.msRequestFullscreen) {
+        mapWrapper.current.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  }, [isMapFullscreen]);
+
+  // Listen for fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsMapFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Resize map when fullscreen changes
+  useEffect(() => {
+    if (map.current) {
+      setTimeout(() => {
+        map.current.resize();
+      }, 100);
+    }
+  }, [isMapFullscreen]);
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
@@ -587,11 +643,32 @@ export default function Dashboard() {
       </div>
 
 
-      <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-        <h2 className="text-lg font-bold mb-4">{t("dashboard.bus_map_title")}</h2>
+      <div
+        ref={mapWrapper}
+        className={`bg-white rounded-lg shadow-sm mb-6 ${isMapFullscreen ? 'p-4' : 'p-6'}`}
+        style={isMapFullscreen ? { height: '100%', display: 'flex', flexDirection: 'column' } : {}}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">{t("dashboard.bus_map_title")}</h2>
+          <button
+            onClick={toggleMapFullscreen}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm"
+            title={isMapFullscreen ? t('dashboard.exit_fullscreen') : t('dashboard.fullscreen')}
+          >
+            {isMapFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            <span className="hidden sm:inline">
+              {isMapFullscreen ? t('dashboard.exit_fullscreen') : t('dashboard.fullscreen')}
+            </span>
+          </button>
+        </div>
         <div
           ref={mapContainer}
-          style={{ height: "400px", width: "100%", borderRadius: "12px", overflow: "hidden" }}
+          style={{
+            height: isMapFullscreen ? 'calc(100% - 80px)' : '400px',
+            width: '100%',
+            borderRadius: '12px',
+            overflow: 'hidden'
+          }}
         />
         <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
           <div className="flex items-center gap-1.5">

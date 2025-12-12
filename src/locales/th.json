@@ -25,7 +25,9 @@
         "bus_map_title": "ติดตามรถบัสแบบสด",
         "bus": "รถบัส",
         "showing_buses": "แสดง {{count}} คัน",
-        "people": "คน"
+        "people": "คน",
+        "fullscreen": "เต็มหน้าจอ",
+        "exit_fullscreen": "ออกจากเต็มหน้าจอ"
     },
     "filters": {
         "label": "ตัวกรอง:",
