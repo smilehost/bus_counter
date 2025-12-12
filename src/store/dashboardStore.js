@@ -104,7 +104,7 @@ export const useDashboardStore = create((set, get) => ({
 
   // 2. Dashboard UI Filters
   filters: {
-    company: 3, // Default to user's company (Bussing Khon Kaen)
+    company: "all", // Default to all companies
     dateRange: "today",
     route: "all",
     busId: "all",
@@ -138,7 +138,7 @@ export const useDashboardStore = create((set, get) => ({
 
   resetFilters: () =>
     set((state) => ({
-      filters: { ...state.filters, company: 3, route: "all", busId: "all", dateRange: "today" }
+      filters: { ...state.filters, company: "all", route: "all", busId: "all", dateRange: "today" }
     })),
 
   // Fetch buses/counters from API

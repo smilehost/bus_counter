@@ -2,16 +2,17 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Sector
 } from "recharts";
-import { BarChart3, PieChart as PieChartIcon, Maximize2, Minimize2 } from "lucide-react";
+import { BarChart3, PieChart as PieChartIcon, Maximize2, Minimize2, Download } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import * as maptilersdk from "@maptiler/sdk";
 import "@maptiler/sdk/dist/maptiler-sdk.css";
-
+import * as XLSX from "xlsx";
 
 import DashboardFilters from "../components/dashboard/DashboardFilters";
 import DataTable from "../components/dashboard/DataTable";
 import { SkeletonCard, SkeletonChart, SkeletonMap, SkeletonTable } from "../components/Skeleton";
-
+import CustomButton from "../components/CustomButto";
+import ReusableModal from "../components/modal";
 
 import { useDashboardStore } from "../store/dashboardStore";
 
@@ -286,6 +287,8 @@ export default function Dashboard() {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [mapViewFilter, setMapViewFilter] = useState("all"); // "all" | "in" | "out"
   const [activeIndex, setActiveIndex] = useState(0);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportStatus, setExportStatus] = useState('idle');
 
   const onPieEnter = useCallback((_, index) => {
     setActiveIndex(index);
@@ -341,6 +344,42 @@ export default function Dashboard() {
   // Get filtered buses from store
   const filteredBuses = getFilteredBuses();
 
+  // Handle Excel Export
+  const handleExportExcel = useCallback(() => {
+    setShowExportModal(true);
+    setExportStatus('loading');
+
+    setTimeout(() => {
+      try {
+        const exportData = filteredBuses.map((bus, index) => ({
+          'No.': index + 1,
+          'Counter ID': bus.counterId,
+          'Bus ID': bus.id,
+          'Company ID': bus.companyId,
+          'Passengers In': bus.inCount,
+          'Passengers Out': bus.outCount,
+          'Current Passengers': bus.passengers,
+          'Camera ID': bus.cameraId,
+          'Status': bus.status,
+        }));
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        ws['!cols'] = [
+          { wch: 5 }, { wch: 12 }, { wch: 10 }, { wch: 12 },
+          { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 12 }, { wch: 12 },
+        ];
+        XLSX.utils.book_append_sheet(wb, ws, 'Bus Counter Data');
+
+        const date = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `bus_counter_export_${date}.xlsx`);
+        setExportStatus('success');
+      } catch (error) {
+        console.error('Export error:', error);
+        setExportStatus('error');
+      }
+    }, 500);
+  }, [filteredBuses]);
 
   // Fetch bus counters from API via store
   useEffect(() => {
@@ -603,8 +642,22 @@ export default function Dashboard() {
         markers.current.push(marker);
       });
 
-      // Fit bounds if there are markers
-      if (filteredBuses.length > 0) {
+      // If only one bus (specific bus selected), flyTo and open popup
+      if (filteredBuses.length === 1) {
+        const bus = filteredBuses[0];
+        map.current.flyTo({
+          center: [bus.lng, bus.lat],
+          zoom: 15,
+          duration: 1000,
+        });
+        // Open the popup after flying
+        setTimeout(() => {
+          if (markers.current[0]) {
+            markers.current[0].togglePopup();
+          }
+        }, 1100);
+      } else if (filteredBuses.length > 1) {
+        // Fit bounds for multiple markers
         const bounds = new maptilersdk.LngLatBounds();
         filteredBuses.forEach((bus) => {
           bounds.extend([bus.lng, bus.lat]);
@@ -1029,7 +1082,19 @@ export default function Dashboard() {
       </style>
 
       <div className="mb-6">
-        <h2 className="text-lg font-bold mb-4">{t('dashboard.recent_transactions')}</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">{t('dashboard.recent_transactions')}</h2>
+          <CustomButton
+            variant="outline"
+            size="sm"
+            icon={<Download size={16} />}
+            onClick={handleExportExcel}
+            disabled={filteredBuses.length === 0 || exportStatus === 'loading'}
+            loading={exportStatus === 'loading'}
+          >
+            Export Excel
+          </CustomButton>
+        </div>
         <div className="overflow-x-auto">
           {busesLoading ? (
             <SkeletonTable rows={5} columns={8} />
@@ -1038,6 +1103,27 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      <ReusableModal
+        open={showExportModal}
+        onClose={() => { setShowExportModal(false); setExportStatus('idle'); }}
+        title="Export to Excel"
+        fields={[
+          exportStatus === 'loading' ? {
+            type: 'info', name: 'status', label: 'Status', value: '⏳ Preparing your file...',
+          } : exportStatus === 'success' ? {
+            type: 'warning', name: 'success', variant: 'success', icon: '✅',
+            message: `Export สำเร็จ! ${filteredBuses.length} รายการ`,
+          } : exportStatus === 'error' ? {
+            type: 'warning', name: 'error', variant: 'danger', icon: '❌',
+            message: 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง',
+          } : {
+            type: 'info', name: 'info', label: 'จำนวนข้อมูล', value: `${filteredBuses.length} รายการ`,
+          },
+        ]}
+        confirmText={exportStatus === 'success' ? 'Done' : undefined}
+        onConfirm={exportStatus === 'success' ? () => { setShowExportModal(false); setExportStatus('idle'); } : undefined}
+      />
     </div>
   );
 }

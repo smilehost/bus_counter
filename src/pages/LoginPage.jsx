@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { login } from "../services/authService";
+import { useAuthStore } from "../store/useAuthStore";
+import { useSnackbar } from "notistack";
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar();
+    const authLogin = useAuthStore((state) => state.login);
+
     const [formData, setFormData] = useState({
         username: "",
         password: "",
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -17,11 +24,46 @@ export default function LoginPage() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    // Map role string to number for ProtectedRoute
+    const roleMap = {
+        admin: 1,
+        user: 2,
+        viewer: 3,
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Login submitted:", formData);
-        // TODO: Implement actual login logic
-        navigate("/landing");
+        setIsLoading(true);
+
+        try {
+            // Mock login - just call the endpoint, no credentials needed
+            const response = await login();
+
+            // Backend returns { success: true, data: { token: "..." } }
+            const token = response.data?.token || response.token;
+
+            // User data from backend payload: { user, com_id, role }
+            // role comes as string "admin", need to convert to number
+            const backendRole = "admin"; // This comes from token payload
+
+            const user = {
+                id: 1,
+                name: "artijom",
+                com_id: 1,
+                role: roleMap[backendRole] || 1, // Convert "admin" -> 1
+            };
+
+            // Store token and user in auth store + localStorage
+            authLogin(token, user);
+
+            enqueueSnackbar("Login successful!", { variant: "success" });
+            navigate("/");
+        } catch (error) {
+            const message = error.response?.data?.message || "Login failed. Please try again.";
+            enqueueSnackbar(message, { variant: "error" });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -266,29 +308,56 @@ export default function LoginPage() {
                     {/* Submit Button */}
                     <button
                         type="submit"
+                        disabled={isLoading}
                         style={{
                             width: "100%",
                             padding: "14px",
                             fontSize: "16px",
                             fontWeight: "600",
                             color: "white",
-                            background: "linear-gradient(135deg, #1565C0 0%, #42A5F5 100%)",
+                            background: isLoading
+                                ? "linear-gradient(135deg, #90CAF9 0%, #90CAF9 100%)"
+                                : "linear-gradient(135deg, #1565C0 0%, #42A5F5 100%)",
                             borderRadius: "12px",
-                            cursor: "pointer",
+                            cursor: isLoading ? "not-allowed" : "pointer",
                             transition: "all 0.3s",
                             boxShadow: "0 4px 15px rgba(25, 118, 210, 0.4)",
+                            border: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
                         }}
                         onMouseOver={(e) => {
-                            e.target.style.transform = "translateY(-2px)";
-                            e.target.style.boxShadow = "0 6px 20px rgba(25, 118, 210, 0.5)";
+                            if (!isLoading) {
+                                e.target.style.transform = "translateY(-2px)";
+                                e.target.style.boxShadow = "0 6px 20px rgba(25, 118, 210, 0.5)";
+                            }
                         }}
                         onMouseOut={(e) => {
                             e.target.style.transform = "translateY(0)";
                             e.target.style.boxShadow = "0 4px 15px rgba(25, 118, 210, 0.4)";
                         }}
                     >
-                        Sign In
+                        {isLoading ? (
+                            <>
+                                <svg
+                                    style={{ animation: "spin 1s linear infinite", width: 20, height: 20 }}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                                </svg>
+                                Signing in...
+                            </>
+                        ) : (
+                            "Sign In"
+                        )}
                     </button>
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                 </form>
             </div>
         </div>
