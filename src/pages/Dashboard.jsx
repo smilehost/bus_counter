@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip
+  PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Sector
 } from "recharts";
 import { BarChart3, PieChart as PieChartIcon, Maximize2, Minimize2 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
@@ -165,8 +165,13 @@ const createPopupContent = (bus, t) => {
       ? "#E65100"
       : "#616161";
 
+  // Get company translation key - use companyId if available
+  const companyKey = bus.companyId
+    ? `companies.company_${bus.companyId}`
+    : `companies.${bus.company}`;
+
   return `
-    <div style="padding: 16px; min-width: 200px;">
+    <div style="padding: 16px; min-width: 220px;">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;">
         <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #1976D2 0%, #42A5F5 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -181,19 +186,35 @@ const createPopupContent = (bus, t) => {
         </div>
         <div>
           <div style="font-weight: 600; font-size: 16px; color: #333;">${t("dashboard.bus")} #${bus.id}</div>
-          <div style="font-size: 12px; color: #888;">${t(`routes.${bus.route}`)}</div>
+          <div style="font-size: 12px; color: #888;">${t(companyKey)}</div>
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-          <span style="color: #888;">${t("table.company")}</span>
-          <span style="font-weight: 500; color: #333;">${t(`companies.${bus.company}`)}</span>
+          <span style="color: #888;">${t("dashboard.route_label")}</span>
+          <span style="font-weight: 500; color: #333;">${t(`routes.${bus.route}`)}</span>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-          <span style="color: #888;">${t("table.passengers")}</span>
-          <span style="font-weight: 500; color: #333;">${bus.passengers}</span>
+          <span style="color: #888; display: flex; align-items: center; gap: 4px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19V5"></path>
+              <path d="M5 12l7-7 7 7"></path>
+            </svg>
+            ${t("dashboard.counter_in")}
+          </span>
+          <span style="font-weight: 600; color: #4CAF50;">${bus.inCount || 0}</span>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+          <span style="color: #888; display: flex; align-items: center; gap: 4px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F44336" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14"></path>
+              <path d="M19 12l-7 7-7-7"></path>
+            </svg>
+            ${t("dashboard.counter_out")}
+          </span>
+          <span style="font-weight: 600; color: #F44336;">${bus.outCount || 0}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-top: 4px; padding-top: 8px; border-top: 1px solid #f0f0f0;">
           <span style="color: #888;">${t("table.status")}</span>
           <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background-color: ${statusBg}; color: ${statusTextColor};">${statusText}</span>
         </div>
@@ -232,12 +253,27 @@ export default function Dashboard() {
   const mapWrapper = useRef(null);
   const map = useRef(null);
   const markers = useRef([]);
-  const [buses, setBuses] = useState([]);
   const [isReady, setIsReady] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [mapViewFilter, setMapViewFilter] = useState("all"); // "all" | "in" | "out"
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const onPieEnter = useCallback((_, index) => {
+    setActiveIndex(index);
+  }, []);
 
 
-  const { filters, data, setFilter } = useDashboardStore();
+  const {
+    filters,
+    data,
+    setFilter,
+    buses,
+    busesLoading,
+    fetchBuses,
+    getFilteredBuses,
+    getAvailableCompanies,
+    getAvailableBusIds
+  } = useDashboardStore();
 
 
   const currentBarData = data.barChart[filters.company] || data.barChart.all;
@@ -273,17 +309,18 @@ export default function Dashboard() {
   });
 
 
-  const filteredBuses = buses.filter((bus) => {
-    const companyMatch = filters.company === "all" || bus.company === filters.company;
-    const routeMatch = filters.route === "all" || bus.route === filters.route || filters.route === t(`routes.${bus.route}`);
-    return companyMatch && routeMatch;
-  });
+  // Get filtered buses from store
+  const filteredBuses = getFilteredBuses();
 
 
+  // Fetch bus counters from API via store
   useEffect(() => {
-    setBuses(generateAllBuses());
-    setIsReady(true);
-  }, []);
+    const loadBuses = async () => {
+      await fetchBuses();
+      setIsReady(true);
+    };
+    loadBuses();
+  }, [fetchBuses]);
 
 
   const tableColumns = [
@@ -449,6 +486,40 @@ export default function Dashboard() {
     }
   }, [isMapFullscreen]);
 
+  const renderActiveShape = (props) => {
+    const RADIAN = Math.PI / 180;
+    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
+
+    return (
+      <g>
+        <text x={cx} y={cy} dy={-10} textAnchor="middle" fill="#333" fontSize={13} fontWeight={600}>
+          {t(`routes.${payload.name}`).substring(0, 15) + (t(`routes.${payload.name}`).length > 15 ? '...' : '')}
+        </text>
+        <text x={cx} y={cy} dy={15} textAnchor="middle" fill="#999" fontSize={11}>
+          {`฿${value.toLocaleString()}`}
+        </text>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 5}
+          outerRadius={outerRadius + 8}
+          fill={fill}
+        />
+      </g>
+    );
+  };
+
   // Listen for fullscreen change events
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -498,6 +569,10 @@ export default function Dashboard() {
           onDateRangeChange={(val) => setFilter('dateRange', val)}
           route={filters.route}
           onRouteChange={(val) => setFilter('route', val)}
+          busId={filters.busId}
+          onBusIdChange={(val) => setFilter('busId', val)}
+          availableBusIds={getAvailableBusIds()}
+          availableCompanies={getAvailableCompanies()}
         />
       </div>
 
@@ -517,7 +592,7 @@ export default function Dashboard() {
       </div>
 
 
-      <div className="bg-white rounded-lg p-6 shadow-sm mb-6" style={{ height: "420px" }}>
+      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm mb-6" style={{ height: "350px" }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">
             {filters.chartType === "bar" ? t('dashboard.revenue_by_route') : t('dashboard.transactions_by_payment')}
@@ -543,9 +618,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <ResponsiveContainer width="100%" height="85%">
+        <ResponsiveContainer width="100%" height="80%">
           {filters.chartType === "bar" ? (
-            <BarChart data={filteredBarData} margin={{ top: 10, right: 15, left: -10, bottom: 60 }}>
+            <BarChart data={filteredBarData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#FF9800" stopOpacity={1} />
@@ -555,20 +630,17 @@ export default function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 9, fill: "#888" }}
-                angle={-35}
-                textAnchor="end"
-                height={60}
-                interval={0}
+                tick={false}
                 axisLine={{ stroke: '#e0e0e0' }}
                 tickLine={false}
+                height={10}
               />
               <YAxis
-                tick={{ fontSize: 9, fill: "#888" }}
+                tick={{ fontSize: 11, fill: "#666" }}
                 tickFormatter={(value) => `฿${(value / 1000).toFixed(0)}k`}
                 axisLine={false}
                 tickLine={false}
-                width={45}
+                width={50}
               />
               <Tooltip
                 contentStyle={{
@@ -611,29 +683,35 @@ export default function Dashboard() {
           ) : (
             <PieChart>
               <Pie
-                data={currentPieData}
+                activeIndex={activeIndex}
+                activeShape={renderActiveShape}
+                data={filteredBarData}
                 cx="50%"
                 cy="45%"
-                labelLine={false}
-                label={CustomPieLabel}
-                outerRadius={100}
-                innerRadius={45}
+                innerRadius={55} // Increased slightly
+                outerRadius={100} // Reduced slightly for hover space
                 fill="#8884d8"
                 dataKey="value"
-                paddingAngle={3}
+                onMouseEnter={onPieEnter}
+                paddingAngle={2}
               >
-                {currentPieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {filteredBarData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'][index % 6]} />
                 ))}
               </Pie>
+              <Tooltip
+                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+                formatter={(value, name, props) => [`฿${value.toLocaleString()}`, t(`routes.${props.payload.name}`)]}
+              />
               <Legend
                 verticalAlign="bottom"
-                height={40}
+                height={64}
                 iconType="circle"
                 iconSize={8}
+                wrapperStyle={{ overflowY: 'auto' }}
                 formatter={(value, entry) => (
-                  <span style={{ color: "#555", fontSize: "0.75rem", fontWeight: 500 }}>
-                    {value}: {entry.payload.value}%
+                  <span style={{ color: "#555", fontSize: "0.75rem", fontWeight: 500, marginLeft: 4 }}>
+                    {t(`routes.${entry.payload.name}`)}
                   </span>
                 )}
               />
@@ -648,51 +726,98 @@ export default function Dashboard() {
         className={`bg-white rounded-lg shadow-sm mb-6 ${isMapFullscreen ? 'p-4' : 'p-6'}`}
         style={isMapFullscreen ? { height: '100%', display: 'flex', flexDirection: 'column' } : {}}
       >
-        <div className="flex items-center justify-between mb-4">
+        {/* Header with title and view filter buttons */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4 sm:gap-0">
           <h2 className="text-lg font-bold">{t("dashboard.bus_map_title")}</h2>
-          <button
-            onClick={toggleMapFullscreen}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm"
-            title={isMapFullscreen ? t('dashboard.exit_fullscreen') : t('dashboard.fullscreen')}
-          >
-            {isMapFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            <span className="hidden sm:inline">
-              {isMapFullscreen ? t('dashboard.exit_fullscreen') : t('dashboard.fullscreen')}
-            </span>
-          </button>
+
+          {/* In/Out/All Filter Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setMapViewFilter("all")}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${mapViewFilter === "all"
+                ? "bg-blue-500 text-white shadow-sm"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+            >
+              {t("dashboard.show_all")}
+            </button>
+            <button
+              onClick={() => setMapViewFilter("in")}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${mapViewFilter === "in"
+                ? "bg-green-500 text-white shadow-sm"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 19V5"></path>
+                <path d="M5 12l7-7 7 7"></path>
+              </svg>
+              {t("dashboard.show_in")}
+            </button>
+            <button
+              onClick={() => setMapViewFilter("out")}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${mapViewFilter === "out"
+                ? "bg-red-500 text-white shadow-sm"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14"></path>
+                <path d="M19 12l-7 7-7-7"></path>
+              </svg>
+              {t("dashboard.show_out")}
+            </button>
+          </div>
         </div>
+
+        {/* Map Container */}
         <div
           ref={mapContainer}
           style={{
-            height: isMapFullscreen ? 'calc(100% - 80px)' : '400px',
+            height: isMapFullscreen ? 'calc(100% - 120px)' : '400px',
             width: '100%',
             borderRadius: '12px',
             overflow: 'hidden'
           }}
         />
-        <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+
+        {/* Bottom Bar with Legend, Count and Fullscreen */}
+        <div className="mt-3 flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+          {/* Legend */}
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-green-500"></span>
-            <span>{t("table.completed")}</span>
+            <span>{t("dashboard.counter_in")}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-orange-400"></span>
-            <span>{t("table.in_progress")}</span>
+            <span className="w-3 h-3 rounded-full bg-red-500"></span>
+            <span>{t("dashboard.counter_out")}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-gray-400"></span>
-            <span>{t("table.scheduled")}</span>
-          </div>
-          <div className="ml-auto">
+
+          {/* Bus Count */}
+          <div className="text-gray-600">
             {t("dashboard.showing_buses", { count: filteredBuses.length })}
           </div>
+
+          {/* Fullscreen Button - moved to bottom right */}
+          <button
+            onClick={toggleMapFullscreen}
+            className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm"
+            title={isMapFullscreen ? t('dashboard.exit_fullscreen') : t('dashboard.fullscreen')}
+          >
+            {isMapFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            <span className="hidden sm:inline">
+              {isMapFullscreen ? t('dashboard.exit_fullscreen') : t('dashboard.fullscreen')}
+            </span>
+          </button>
         </div>
       </div>
 
 
       <div className="mb-6">
         <h2 className="text-lg font-bold mb-4">{t('dashboard.recent_transactions')}</h2>
-        <DataTable data={filteredTableData} columns={tableColumns} itemsPerPage={5} />
+        <div className="overflow-x-auto">
+          <DataTable data={filteredTableData} columns={tableColumns} itemsPerPage={5} />
+        </div>
       </div>
     </div>
   );

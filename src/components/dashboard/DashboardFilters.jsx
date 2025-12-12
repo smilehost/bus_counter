@@ -10,6 +10,10 @@ export default function DashboardFilters({
     onDateRangeChange = () => { },
     route,
     onRouteChange = () => { },
+    busId,
+    onBusIdChange = () => { },
+    availableBusIds = [],
+    availableCompanies = [],
     customStartDate,
     customEndDate,
     onCustomDateChange = () => { },
@@ -205,9 +209,19 @@ export default function DashboardFilters({
                         className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] cursor-pointer bg-white"
                     >
                         <option value="all">{t('filters.all_companies')}</option>
-                        <option value="company_a">{t('companies.company_a')}</option>
-                        <option value="company_b">{t('companies.company_b')}</option>
-                        <option value="company_c">{t('companies.company_c')}</option>
+                        {availableCompanies.length > 0 ? (
+                            availableCompanies.map((companyId) => (
+                                <option key={companyId} value={companyId}>
+                                    {t(`companies.company_${companyId}`)}
+                                </option>
+                            ))
+                        ) : (
+                            <>
+                                <option value="1">{t('companies.company_1')}</option>
+                                <option value="2">{t('companies.company_2')}</option>
+                                <option value="3">{t('companies.company_3')}</option>
+                            </>
+                        )}
                     </select>
 
                     {/* Date Range Filter */}
@@ -254,6 +268,20 @@ export default function DashboardFilters({
                             </select>
                         );
                     })()}
+
+                    {/* Bus ID Filter */}
+                    <select
+                        value={busId}
+                        onChange={(e) => onBusIdChange(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px] cursor-pointer bg-white"
+                    >
+                        <option value="all">{t('filters.all_buses')}</option>
+                        {availableBusIds.map((id) => (
+                            <option key={id} value={id}>
+                                {t('dashboard.bus')} #{id}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* Second Row - Time & Interval Options */}

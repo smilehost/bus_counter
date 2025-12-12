@@ -27,12 +27,19 @@
         "showing_buses": "แสดง {{count}} คัน",
         "people": "คน",
         "fullscreen": "เต็มหน้าจอ",
-        "exit_fullscreen": "ออกจากเต็มหน้าจอ"
+        "exit_fullscreen": "ออกจากเต็มหน้าจอ",
+        "show_all": "ทั้งหมด",
+        "show_in": "ขึ้น",
+        "show_out": "ลง",
+        "counter_in": "ผู้โดยสารขึ้น",
+        "counter_out": "ผู้โดยสารลง",
+        "route_label": "เส้นทาง"
     },
     "filters": {
         "label": "ตัวกรอง:",
         "all_companies": "ทุกบริษัท",
         "all_routes": "ทุกเส้นทาง",
+        "all_buses": "รถบัสทั้งหมด",
         "all_provinces": "ทุกจังหวัด",
         "all_status": "ทุกสถานะ",
         "company_label": "บริษัท",
@@ -88,7 +95,10 @@
     "companies": {
         "company_a": "บัสซิ่ง เชียงใหม่",
         "company_b": "บัสซิ่ง กรุงเทพฯ",
-        "company_c": "บัสซิ่ง ขอนแก่น"
+        "company_c": "บัสซิ่ง ขอนแก่น",
+        "company_1": "บัสซิ่ง เชียงใหม่",
+        "company_2": "บัสซิ่ง กรุงเทพฯ",
+        "company_3": "บัสซิ่ง ขอนแก่น"
     },
     "routes": {
         "route_r1": "R1: สวนสัตว์ - เซ็นทรัลเฟส",

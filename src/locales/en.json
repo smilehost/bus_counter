@@ -27,12 +27,19 @@
         "showing_buses": "Showing {{count}} buses",
         "people": "people",
         "fullscreen": "Fullscreen",
-        "exit_fullscreen": "Exit Fullscreen"
+        "exit_fullscreen": "Exit Fullscreen",
+        "show_all": "All",
+        "show_in": "In",
+        "show_out": "Out",
+        "counter_in": "Passengers In",
+        "counter_out": "Passengers Out",
+        "route_label": "Route"
     },
     "filters": {
         "label": "Filters:",
         "all_companies": "All Companies",
         "all_routes": "All Routes",
+        "all_buses": "All Buses",
         "all_provinces": "All Provinces",
         "all_status": "All Status",
         "company_label": "Company",
@@ -88,7 +95,10 @@
     "companies": {
         "company_a": "Bussing Chiang Mai",
         "company_b": "Bussing Bangkok",
-        "company_c": "Bussing Khon Kaen"
+        "company_c": "Bussing Khon Kaen",
+        "company_1": "Bussing Chiang Mai",
+        "company_2": "Bussing Bangkok",
+        "company_3": "Bussing Khon Kaen"
     },
     "routes": {
         "route_r1": "R1: Zoo - Central Festival",
