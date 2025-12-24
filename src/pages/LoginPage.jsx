@@ -85,7 +85,7 @@ export default function LoginPage() {
           position: "relative",
           zIndex: 10,
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: "360px",
           background: "rgba(255, 255, 255, 0.98)",
           borderRadius: "20px",
           boxShadow:
