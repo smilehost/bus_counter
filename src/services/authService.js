@@ -14,6 +14,22 @@ export const login = async () => {
 };
 
 /**
+ * Login with OAuth callback
+ * @param {string} code - Authorization code from OAuth provider
+ * @param {string} sessionId - Session ID
+ * @param {string} service - Service identifier
+ * @returns {Promise<Object>} Response with access_token, username, refresh_token
+ */
+export const loginWithCallback = async (code, sessionId, service) => {
+  const response = await api.post("/auth/login", {
+    code,
+    session_id: sessionId,
+    service,
+  });
+  return response.data;
+};
+
+/**
  * Logout user
  */
 export const logout = async () => {
@@ -42,10 +58,35 @@ export const removeToken = () => {
   localStorage.removeItem("auth_token");
 };
 
+/**
+ * Get refresh token from localStorage
+ */
+export const getRefreshToken = () => {
+  return localStorage.getItem("refresh_token");
+};
+
+/**
+ * Set refresh token in localStorage
+ */
+export const setRefreshToken = (token) => {
+  localStorage.setItem("refresh_token", token);
+};
+
+/**
+ * Remove refresh token from localStorage
+ */
+export const removeRefreshToken = () => {
+  localStorage.removeItem("refresh_token");
+};
+
 export default {
   login,
+  loginWithCallback,
   logout,
   getToken,
   setToken,
   removeToken,
+  getRefreshToken,
+  setRefreshToken,
+  removeRefreshToken,
 };

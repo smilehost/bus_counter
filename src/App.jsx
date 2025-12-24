@@ -7,6 +7,7 @@ import ManageCamera from "./pages/ManageCamera";
 import ManageBusDoor from "./pages/ManageBusDoor";
 import LoginPage from "./pages/LoginPage";
 import LandingPage from "./pages/LandingPage";
+import AuthCallback from "./pages/AuthCallback";
 
 // ✅ Import แค่ตัวนี้ตัวเดียวพอ (เพราะข้างในมันจัดการ Notistack + Configurator ให้แล้ว)
 import { ToastProvider } from "./components/ToastProvider";
@@ -18,7 +19,8 @@ export default function App() {
         <Routes>
           {/* Public Routes - ไม่มี Sidebar */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/landing" element={<LandingPage />} />
+          {/* <Route path="/landing" element={<LandingPage />} /> */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Protected Routes - มี Sidebar */}
           <Route element={<MainLayout />}>

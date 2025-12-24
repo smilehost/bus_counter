@@ -3,7 +3,7 @@ import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import {
   Drawer,
   List,
@@ -20,12 +20,24 @@ import {
 } from "@mui/material";
 
 // MUI Icons
-import { LayoutDashboard, Camera, Bus, LogOut, LogIn, Home } from "lucide-react";
+import {
+  LayoutDashboard,
+  Camera,
+  Bus,
+  LogOut,
+  LogIn,
+  Home,
+} from "lucide-react";
 
 const drawerWidth = 240;
 
 const menus = [
-  { label: "sidebar.dashboard", path: "/", icon: LayoutDashboard, roles: [1, 2, 3] },
+  {
+    label: "sidebar.dashboard",
+    path: "/",
+    icon: LayoutDashboard,
+    roles: [1, 2, 3],
+  },
   {
     label: "sidebar.manage_camera",
     path: "/manage-camera",
@@ -38,18 +50,18 @@ const menus = [
     icon: Bus,
     roles: [1, 2],
   },
-  {
-    label: "Login Page",
-    path: "/login",
-    icon: LogIn,
-    roles: [1, 2, 3],
-  },
-  {
-    label: "Landing Page",
-    path: "/landing",
-    icon: Home,
-    roles: [1, 2, 3],
-  },
+  // {
+  //   label: "Login Page",
+  //   path: "/login",
+  //   icon: LogIn,
+  //   roles: [1, 2, 3],
+  // },
+  // {
+  //   label: "Landing Page",
+  //   path: "/landing",
+  //   icon: Home,
+  //   roles: [1, 2, 3],
+  // },
 ];
 
 export default function Sidebar({ role, open, onClose }) {
@@ -117,7 +129,7 @@ export default function Sidebar({ role, open, onClose }) {
             alignItems: "center",
           }}
         >
-          {t('app.title')}
+          {t("app.title")}
         </Typography>
       </Toolbar>
 
@@ -223,7 +235,7 @@ export default function Sidebar({ role, open, onClose }) {
 
       <Divider />
 
-      <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
         <ListItemButton
           onClick={() => {
             logout();
@@ -268,7 +280,7 @@ export default function Sidebar({ role, open, onClose }) {
             <LogOut />
           </ListItemIcon>
           <ListItemText
-            primary={t('sidebar.logout')}
+            primary={t("sidebar.logout")}
             primaryTypographyProps={{
               fontSize: { xs: "0.875rem", sm: "0.95rem" },
               fontWeight: "medium",
