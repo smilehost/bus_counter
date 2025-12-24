@@ -11,101 +11,6 @@ const formatDate = (dateString) => {
   return dateString;
 };
 
-// --- Route Keys for each company ---
-const COMPANY_ROUTES = {
-  company_a: ["route_r1", "route_r3", "route_b1"],
-  company_b: ["route_515", "route_140", "route_511", "route_29", "route_504"],
-  company_c: ["route_kk_red", "route_kk_blue", "route_kk_songthaew8"],
-};
-
-// Helper function to generate random revenue data for routes
-const generateRouteRevenue = (routes, baseValue = 2000) => {
-  return routes.map(route => ({
-    name: route,
-    value: baseValue + Math.floor(Math.random() * 3000),
-  }));
-};
-
-// --- Mock Data ---
-const MOCK_DATA = {
-  barChart: {
-    all: [
-      // Combine all routes
-      ...generateRouteRevenue(COMPANY_ROUTES.company_a, 2500),
-      ...generateRouteRevenue(COMPANY_ROUTES.company_b, 3000),
-      ...generateRouteRevenue(COMPANY_ROUTES.company_c, 1800),
-    ],
-    company_a: generateRouteRevenue(COMPANY_ROUTES.company_a, 2500),
-    company_b: generateRouteRevenue(COMPANY_ROUTES.company_b, 3000),
-    company_c: generateRouteRevenue(COMPANY_ROUTES.company_c, 1800),
-  },
-  pieChart: {
-    all: [
-      { name: "Cash", value: 57, color: "#66BB6A" },
-      { name: "QR Code", value: 43, color: "#64B5F6" },
-    ],
-    company_a: [
-      { name: "Cash", value: 72, color: "#66BB6A" },
-      { name: "QR Code", value: 28, color: "#64B5F6" },
-    ],
-    company_b: [
-      { name: "Cash", value: 45, color: "#66BB6A" },
-      { name: "QR Code", value: 55, color: "#64B5F6" },
-    ],
-    company_c: [
-      { name: "Cash", value: 68, color: "#66BB6A" },
-      { name: "QR Code", value: 32, color: "#64B5F6" },
-    ],
-  },
-  stats: [
-    {
-      id: "passengers",
-      translationKey: "dashboard.total_passengers",
-      value: "1,856",
-      change: "+8.1%",
-      changeKey: "dashboard.from_yesterday",
-      changeType: "positive",
-      icon: Users,
-      bgColor: "#66BB6A",
-    },
-    {
-      id: "revenue",
-      translationKey: "dashboard.total_revenue",
-      value: "฿45,200",
-      change: "+12.3%",
-      changeKey: "dashboard.from_yesterday",
-      changeType: "positive",
-      icon: Bus,
-      bgColor: "#1976D2",
-    },
-    {
-      id: "routes",
-      translationKey: "dashboard.active_routes",
-      value: "11",
-      changeKey: "dashboard.today",
-      icon: Map,
-      bgColor: "#AB47BC",
-    },
-  ],
-  tableData: [
-    // Chiang Mai routes
-    { id: 1, route: "route_r1", company: "company_a", passengers: 156, revenue: "฿4,680", time: "08:30", status: "Completed" },
-    { id: 2, route: "route_r3", company: "company_a", passengers: 89, revenue: "฿2,670", time: "09:15", status: "Completed" },
-    { id: 3, route: "route_b1", company: "company_a", passengers: 124, revenue: "฿3,720", time: "10:00", status: "In Progress" },
-    // Bangkok routes
-    { id: 4, route: "route_515", company: "company_b", passengers: 245, revenue: "฿7,350", time: "07:00", status: "Completed" },
-    { id: 5, route: "route_140", company: "company_b", passengers: 198, revenue: "฿5,940", time: "07:30", status: "Completed" },
-    { id: 6, route: "route_511", company: "company_b", passengers: 312, revenue: "฿9,360", time: "08:00", status: "In Progress" },
-    { id: 7, route: "route_29", company: "company_b", passengers: 267, revenue: "฿8,010", time: "08:30", status: "In Progress" },
-    { id: 8, route: "route_504", company: "company_b", passengers: 189, revenue: "฿5,670", time: "09:00", status: "Scheduled" },
-    // Khon Kaen routes
-    { id: 9, route: "route_kk_red", company: "company_c", passengers: 78, revenue: "฿2,340", time: "08:00", status: "Completed" },
-    { id: 10, route: "route_kk_blue", company: "company_c", passengers: 95, revenue: "฿2,850", time: "09:00", status: "In Progress" },
-    { id: 11, route: "route_kk_songthaew8", company: "company_c", passengers: 45, revenue: "฿1,350", time: "10:00", status: "Scheduled" },
-    { id: 12, route: "route_r1", company: "company_a", passengers: 134, revenue: "฿4,020", time: "11:00", status: "Scheduled" },
-  ],
-};
-
 // --- Store Implementation ---
 export const useDashboardStore = create((set, get) => ({
   // 1. Auth & User State
@@ -124,10 +29,37 @@ export const useDashboardStore = create((set, get) => ({
 
   // 3. Dashboard Data
   data: {
-    barChart: MOCK_DATA.barChart,
-    pieChart: MOCK_DATA.pieChart,
-    stats: MOCK_DATA.stats,
-    transactions: MOCK_DATA.tableData,
+    barChart: { all: [] },
+    pieChart: { all: [] },
+    stats: [
+      {
+        id: "passengers",
+        translationKey: "dashboard.total_passengers",
+        value: "0",
+        changeKey: "dashboard.from_yesterday", // Context might change with real data
+        changeType: "neutral",
+        icon: Users,
+        bgColor: "#66BB6A",
+      },
+      {
+        id: "active_buses", // Changed from revenue
+        translationKey: "dashboard.active_buses", // Need key for this or reuse
+        value: "0",
+        changeKey: "dashboard.today",
+        changeType: "neutral",
+        icon: Bus,
+        bgColor: "#1976D2",
+      },
+      {
+        id: "routes",
+        translationKey: "dashboard.active_routes",
+        value: "0",
+        changeKey: "dashboard.today",
+        icon: Map,
+        bgColor: "#AB47BC",
+      },
+    ],
+    transactions: [],
   },
 
   // 4. Buses/Counters State
@@ -183,16 +115,86 @@ export const useDashboardStore = create((set, get) => ({
         counterId: counter.counter_id,
         lat: parseFloat(counter.counter_lat),
         lng: parseFloat(counter.counter_lng),
-        passengers: counter.counter_in_count - counter.counter_out_count,
+        passengers: Math.max(0, counter.counter_in_count - counter.counter_out_count), // Ensure non-negative
         inCount: counter.counter_in_count,
         outCount: counter.counter_out_count,
         cameraId: counter.counter_installed_camera_id,
-        companyId: counter.counter_com_id, // Store raw company ID for filtering
-        route: "route_r1", // Default route, can be updated when API provides route info
-        status: "In Progress",
+        companyId: counter.counter_com_id,
+        route: "Unknown", // Placeholder as route is missing
+        status: counter.counter_active ? "In Progress" : "Completed", // Infer status
       }));
 
-      set({ buses: busesFromApi, busesLoading: false });
+      // --- Calculate Derived Data ---
+
+      // 1. Stats
+      const totalPassengers = busesFromApi.reduce((sum, bus) => sum + bus.inCount, 0); // Using Total In as "Total Passengers"
+      const activeBuses = busesFromApi.length;
+      // const activeRoutes = new Set(busesFromApi.map(b => b.route)).size; // meaningless without route data
+
+      const newStats = [
+        {
+          id: "passengers",
+          translationKey: "dashboard.total_passengers",
+          value: totalPassengers.toLocaleString(),
+          change: "", // No history to diff against yet
+          changeKey: "dashboard.today",
+          changeType: "neutral",
+          icon: Users,
+          bgColor: "#66BB6A",
+        },
+        {
+          id: "active_buses",
+          translationKey: "dashboard.bus", // Use generic "Bus" or "Active Buses"
+          value: activeBuses.toString(),
+          change: "",
+          changeKey: "dashboard.today",
+          changeType: "neutral",
+          icon: Bus,
+          bgColor: "#1976D2",
+        },
+        // Reusing 3rd card for something else or keeping it simple
+        {
+          id: "cameras",
+          translationKey: "table.camera", // Reusing camera translation
+          value: new Set(busesFromApi.map(b => b.cameraId)).size.toString(),
+          changeKey: "dashboard.today",
+          icon: Map,
+          bgColor: "#AB47BC",
+        },
+      ];
+
+      // 2. Bar Chart: Passengers by Company
+      // Since we don't have company names in this service, we use IDs or hardcoded names if we had them.
+      // Assuming 1, 2, 3 from previous file.
+      const companyNames = {
+        1: "Chiang Mai",
+        2: "Bangkok",
+        3: "Khon Kaen"
+      };
+
+      const companyStats = busesFromApi.reduce((acc, bus) => {
+        const id = bus.companyId;
+        const name = companyNames[id] || `Company ${id}`;
+        if (!acc[id]) acc[id] = { name: name, value: 0 };
+        acc[id].value += bus.inCount;
+        return acc;
+      }, {});
+
+      const barChartData = Object.values(companyStats);
+
+      // 3. Transactions (Table Data) - Just use the buses list
+      const transactions = busesFromApi;
+
+      set({
+        buses: busesFromApi,
+        data: {
+          barChart: { all: barChartData }, // Simplified structure
+          pieChart: { all: [] }, // Empty for now
+          stats: newStats,
+          transactions: transactions,
+        },
+        busesLoading: false
+      });
     } catch (error) {
       console.error('Error fetching counters:', error);
       set({ busesError: error.message, busesLoading: false });
@@ -237,11 +239,10 @@ export const useDashboardStore = create((set, get) => ({
   // Selector: Get filtered transactions
   getFilteredTransactions: () => {
     const state = get();
-    const { company, route } = state.filters;
+    const { company } = state.filters; // Only filter by company for table usually
     return state.data.transactions.filter(t => {
-      const companyMatch = company === "all" || t.company === company;
-      const routeMatch = route === "all" || t.route === route;
-      return companyMatch && routeMatch;
+      const companyMatch = company === "all" || t.companyId === parseInt(company);
+      return companyMatch;
     });
   },
 }));

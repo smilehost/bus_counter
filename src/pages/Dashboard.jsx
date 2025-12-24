@@ -29,43 +29,7 @@ const COMPANY_LOCATIONS = {
   3: { lat: 16.4419, lng: 102.8360, name: "Khon Kaen" },
 };
 
-const generateAllBuses = () => {
-  // Legacy mock data generator - keeping structure but likely unused
-  const companyRoutes = {
-    1: ["route_r1", "route_r3", "route_b1"],
-    2: ["route_515", "route_140", "route_511", "route_29", "route_504"],
-    3: ["route_kk_red", "route_kk_blue", "route_kk_songthaew8"],
-  };
-  const statuses = ["In Progress", "Completed", "Scheduled"];
-  const buses = [];
-  let id = 1;
 
-  Object.entries(companyRoutes).forEach(([company, routes]) => {
-    const location = COMPANY_LOCATIONS[company];
-    routes.forEach((route) => {
-
-      const busCount = Math.floor(Math.random() * 2) + 2;
-
-      for (let i = 0; i < busCount; i++) {
-
-        const latOffset = (Math.random() - 0.5) * 0.08;
-        const lngOffset = (Math.random() - 0.5) * 0.08;
-
-        buses.push({
-          id: id++,
-          route: route,
-          company, // now numeric string or int
-          lat: location.lat + latOffset,
-          lng: location.lng + lngOffset,
-          passengers: Math.floor(Math.random() * 50) + 10,
-          status: statuses[Math.floor(Math.random() * statuses.length)],
-        });
-      }
-    });
-  });
-
-  return buses;
-};
 
 // Create custom marker element
 const createMarkerElement = (bus) => {
@@ -316,36 +280,13 @@ export default function Dashboard() {
   } = useDashboardStore();
 
 
-  const currentBarData = data.barChart[filters.company] || data.barChart.all;
-  const currentPieData = data.pieChart[filters.company] || data.pieChart.all;
+  // No more mock transforms needed
+  const currentBarData = data.barChart.all;
 
-
-  const enrichedBarData = currentBarData.map(item => ({
-    ...item,
-    passengers: Math.floor(item.value / 30) + Math.floor(Math.random() * 20),
-  }));
-
-
-  const translatedBarData = enrichedBarData.map(item => {
-    const fullName = t(`routes.${item.name}`);
-    // Shorten route names for better display
-    const shortName = fullName.length > 12 ? fullName.substring(0, 10) + '...' : fullName;
-    return {
-      ...item,
-      name: shortName,
-      fullName: fullName,
-    };
-  });
-
-  const filteredBarData = filters.route === "all"
-    ? translatedBarData
-    : translatedBarData.filter(item => enrichedBarData.find(d => d.name === filters.route && t(`routes.${d.name}`).includes(item.name.replace('...', ''))));
-
-
+  // Filter transactions
   const filteredTableData = data.transactions.filter(row => {
-    const companyMatch = filters.company === "all" || row.company === filters.company;
-    const routeMatch = filters.route === "all" || row.route === filters.route;
-    return companyMatch && routeMatch;
+    const companyMatch = filters.company === "all" || row.companyId === parseInt(filters.company);
+    return companyMatch;
   });
 
 
@@ -860,8 +801,9 @@ export default function Dashboard() {
       <div className={`bg-white rounded-lg p-4 sm:p-6 shadow-sm mb-6 ${isMobile && filters.chartType === 'pie' ? 'h-[480px]' : 'h-[350px]'}`}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4 sm:gap-0">
           <h2 className="text-lg font-bold">
-            {filters.chartType === "bar" ? t('dashboard.revenue_by_route') : t('dashboard.transactions_by_payment')}
+            {t('dashboard.total_passengers_by_company')}
           </h2>
+
 
           <div className="flex gap-2 self-start sm:self-auto">
             <button
@@ -873,21 +815,13 @@ export default function Dashboard() {
               <span className="hidden sm:inline">{t('dashboard.bar_chart')}</span>
               <span className="sm:hidden">Bar</span>
             </button>
-            <button
-              onClick={() => setFilter('chartType', 'pie')}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filters.chartType === "pie" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-            >
-              <PieChartIcon size={18} />
-              <span className="hidden sm:inline">{t('dashboard.pie_chart')}</span>
-              <span className="sm:hidden">Pie</span>
-            </button>
+            {/* Pie Chart removed as no data available */}
           </div>
         </div>
 
         <ResponsiveContainer width="100%" height="80%">
           {filters.chartType === "bar" ? (
-            <BarChart data={filteredBarData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+            <BarChart data={currentBarData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#FF9800" stopOpacity={1} />
@@ -904,10 +838,10 @@ export default function Dashboard() {
               />
               <YAxis
                 tick={{ fontSize: 11, fill: "#666" }}
-                tickFormatter={(value) => `฿${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) => value}
                 axisLine={false}
                 tickLine={false}
-                width={50}
+                width={30}
               />
               <Tooltip
                 contentStyle={{
@@ -924,15 +858,11 @@ export default function Dashboard() {
                     return (
                       <div style={{ background: 'white', padding: '12px 16px', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
                         <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8, color: '#333' }}>
-                          {data.fullName || data.name}
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <span style={{ fontSize: 11, color: '#888' }}>{t('table.revenue')}:</span>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: '#FF9800' }}>฿{data.value.toLocaleString()}</span>
+                          {data.name}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontSize: 11, color: '#888' }}>{t('table.passengers')}:</span>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: '#1976D2' }}>{data.passengers} {t('dashboard.people')}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#1976D2' }}>{data.value} {t('dashboard.people')}</span>
                         </div>
                       </div>
                     );
@@ -947,57 +877,7 @@ export default function Dashboard() {
                 maxBarSize={40}
               />
             </BarChart>
-          ) : (
-            <PieChart>
-              <Pie
-                activeIndex={activeIndex}
-                activeShape={renderActiveShape}
-                data={filteredBarData}
-                cx={isMobile ? "50%" : "35%"}
-                cy={isMobile ? "40%" : "50%"}
-                innerRadius={50}
-                outerRadius={90}
-                fill="#8884d8"
-                dataKey="value"
-                onMouseEnter={onPieEnter}
-                paddingAngle={2}
-              >
-                {filteredBarData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'][index % 6]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
-                formatter={(value, name, props) => [`฿${value.toLocaleString()}`, t(`routes.${props.payload.name}`)]}
-              />
-              <Legend
-                layout={isMobile ? "horizontal" : "vertical"}
-                verticalAlign={isMobile ? "bottom" : "middle"}
-                align={isMobile ? "center" : "right"}
-                iconType="circle"
-                iconSize={8}
-                wrapperStyle={isMobile ? {
-                  fontSize: '11px',
-                  bottom: 0,
-                  width: '100%',
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center',
-                  paddingTop: '20px'
-                } : {
-                  paddingLeft: 20,
-                  maxHeight: '200px',
-                  overflowY: 'auto',
-                  fontSize: '12px'
-                }}
-                formatter={(value, entry) => (
-                  <span style={{ color: "#555", fontSize: "0.75rem", fontWeight: 500, marginLeft: 4, marginRight: isMobile ? 8 : 0 }}>
-                    {t(`routes.${entry.payload.name}`)}
-                  </span>
-                )}
-              />
-            </PieChart>
-          )}
+          ) : null}
         </ResponsiveContainer>
       </div>
 
@@ -1128,7 +1008,7 @@ export default function Dashboard() {
           {busesLoading ? (
             <SkeletonTable rows={5} columns={8} />
           ) : (
-            <DataTable data={filteredBuses} columns={tableColumns} itemsPerPage={5} onPagedDataChange={setVisibleTableData} />
+            <DataTable data={filteredTableData} columns={tableColumns} itemsPerPage={5} onPagedDataChange={setVisibleTableData} />
           )}
         </div>
       </div>

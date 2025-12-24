@@ -108,24 +108,6 @@ export default function DataTable({ data, columns, itemsPerPage: defaultItemsPer
 
             {/* Pagination */}
             <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <label className="text-sm text-gray-600">{t('table.rows_per_page')}:</label>
-                        <select
-                            value={itemsPerPage}
-                            onChange={handleRowsPerPageChange}
-                            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            {rowsPerPageOptions.map(option => (
-                                <option key={option} value={option}>{option}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                        {t('table.showing')} {data.length > 0 ? startIndex + 1 : 0} {t('table.to')} {Math.min(endIndex, data.length)} {t('table.of')} {data.length} {t('table.entries')}
-                    </div>
-                </div>
-
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => goToPage(currentPage - 1)}
@@ -159,6 +141,24 @@ export default function DataTable({ data, columns, itemsPerPage: defaultItemsPer
                     >
                         <ChevronRight size={20} />
                     </button>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm text-gray-600">{t('table.rows_per_page')}:</label>
+                        <select
+                            value={itemsPerPage}
+                            onChange={handleRowsPerPageChange}
+                            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            {rowsPerPageOptions.map(option => (
+                                <option key={option} value={option}>{option}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                        {t('table.showing')} {data.length > 0 ? startIndex + 1 : 0} {t('table.to')} {Math.min(endIndex, data.length)} {t('table.of')} {data.length} {t('table.entries')}
+                    </div>
                 </div>
             </div>
         </div>
