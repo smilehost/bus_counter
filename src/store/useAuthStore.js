@@ -35,11 +35,17 @@ export const useAuthStore = create((set, get) => ({
         });
       }
     } else {
+      // 💡 Mock Auto-Login (Admin) so we open Dashboard immediately
       set({
-        token: null,
+        token: "mock-token",
         refreshToken: null,
-        user: null,
-        isAuthenticated: false,
+        user: {
+          id: 999,
+          name: "Admin User",
+          role: 1, // Admin
+          com_id: 1,
+        },
+        isAuthenticated: true,
         loading: false,
       });
     }

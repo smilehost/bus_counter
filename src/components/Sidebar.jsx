@@ -25,8 +25,8 @@ import {
   Camera,
   Bus,
   LogOut,
-  LogIn,
-  Home,
+  // LogIn,
+  // Home,
 } from "lucide-react";
 
 const drawerWidth = 240;
@@ -239,7 +239,8 @@ export default function Sidebar({ role, open, onClose }) {
         <ListItemButton
           onClick={() => {
             logout();
-            navigate("/login");
+            // navigate("/login"); // Removed login page
+            window.location.reload(); // Optional: reload to clear state/show unauth message
           }}
           sx={{
             borderRadius: "12px",
