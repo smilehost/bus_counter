@@ -10,6 +10,7 @@ import {
   Box,
   Slide,
   TextField,
+  MenuItem,
 } from "@mui/material";
 import { X } from "lucide-react";
 import ThaiDatePicker from './dashboard/ThaiDatePicker';
@@ -28,6 +29,7 @@ const TextInputWithLanguage = ({ value, onChange, label, language = "EN" }) => {
   const languagePatterns = {
     TH: /^[\u0E00-\u0E7F\s]*$/, // ภาษาไทย + ช่องว่าง
     EN: /^[a-zA-Z\s]*$/,         // ภาษาอังกฤษ + ช่องว่าง
+    EN_NUM: /^[a-zA-Z0-9]*$/,    // ภาษาอังกฤษ + ตัวเลข (ไม่เอาช่องว่าง)
   };
 
   const handleInputChange = (e) => {
@@ -44,6 +46,7 @@ const TextInputWithLanguage = ({ value, onChange, label, language = "EN" }) => {
   const placeholders = {
     TH: "พิมพ์ภาษาไทยเท่านั้น",
     EN: "Type in English only",
+    EN_NUM: "English and Numbers only",
   };
 
   return (
@@ -232,6 +235,49 @@ export default function ReusableModal({
             onChange={(val) => handleFieldChange(field.name, val)}
             language={field.language}
           />
+        );
+
+      case "text":
+        return (
+          <Box key={field.name}>
+            <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+              {field.label}
+            </Typography>
+            <TextField
+              fullWidth
+              type="text"
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              placeholder={`Enter ${field.label}`}
+              variant="outlined"
+              size="small"
+              sx={{ borderRadius: "8px" }}
+            />
+          </Box>
+        );
+
+      case "select":
+        return (
+          <Box key={field.name}>
+            <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+              {field.label}
+            </Typography>
+            <TextField
+              select
+              fullWidth
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{ borderRadius: "8px" }}
+            >
+              {field.options && field.options.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
         );
 
       case "disabled":
