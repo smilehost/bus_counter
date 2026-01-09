@@ -22,21 +22,21 @@ api.interceptors.request.use(
 );
 
 // Response interceptor - Handle errors and 401 unauthorized
-api.interceptors.response.use(
-  (res) => res,
-  (error) => {
-    console.error("API Error:", error.response?.data || error.message);
+// api.interceptors.response.use(
+//   (res) => res,
+//   (error) => {
+//     console.error("API Error:", error.response?.data || error.message);
 
-    // If 401 Unauthorized, clear token and redirect to login
-    if (error.response?.status === 401) {
-      localStorage.removeItem("auth_token");
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
-      }
-    }
+//     // If 401 Unauthorized, clear token and redirect to login
+//     if (error.response?.status === 401) {
+//       localStorage.removeItem("auth_token");
+//       if (window.location.pathname !== "/login") {
+//         window.location.href = "/login";
+//       }
+//     }
 
-    return Promise.reject(error);
-  }
-);
+//     return Promise.reject(error);
+//   }
+// );
 
 export default api;
