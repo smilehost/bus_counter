@@ -3,7 +3,7 @@ import React from "react";
 export default function LoginPage() {
   const handleLogin = () => {
     // Redirect ไปยัง Bussing Authen Center
-    window.location.href = "http://localhost:3001/login?service=1";
+    window.location.href = "http://192.168.1.221:3001/login?service=1";
   };
 
   return (

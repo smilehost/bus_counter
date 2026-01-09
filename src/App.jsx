@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
-
+import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import ManageCamera from "./pages/ManageCamera";
 import ManageBusDoor from "./pages/ManageBusDoor";
@@ -14,8 +14,9 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           {/* Public Routes - ไม่มี Sidebar */}
-          {/* <Route path="/auth/callback" element={<AuthCallback />} /> */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Protected Routes - มี Sidebar */}
           <Route element={<MainLayout />}>
