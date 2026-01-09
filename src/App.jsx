@@ -15,7 +15,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* Public Routes - ไม่มี Sidebar */}
-          <Route path="/auth/callback" element={<AuthCallback />} />
+          {/* <Route path="/auth/callback" element={<AuthCallback />} /> */}
 
           {/* Protected Routes - มี Sidebar */}
           <Route element={<MainLayout />}>
