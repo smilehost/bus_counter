@@ -28,8 +28,7 @@ const TextInputWithLanguage = ({ value, onChange, label, language = "EN" }) => {
   // Regular expressions สำหรับแต่ละภาษา
   const languagePatterns = {
     TH: /^[\u0E00-\u0E7F\s]*$/, // ภาษาไทย + ช่องว่าง
-    EN: /^[a-zA-Z\s]*$/,         // ภาษาอังกฤษ + ช่องว่าง
-    EN_NUM: /^[a-zA-Z0-9]*$/,    // ภาษาอังกฤษ + ตัวเลข (ไม่เอาช่องว่าง)
+    EN_NUM: /^[a-zA-Z0-9\s!\"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~]*$/,    // ภาษาอังกฤษ + ตัวเลข (ไม่เอาช่องว่าง)
   };
 
   const handleInputChange = (e) => {
@@ -45,7 +44,7 @@ const TextInputWithLanguage = ({ value, onChange, label, language = "EN" }) => {
 
   const placeholders = {
     TH: "พิมพ์ภาษาไทยเท่านั้น",
-    EN: "Type in English only",
+    EN: "Type in English + symbols",
     EN_NUM: "English and Numbers only",
   };
 
