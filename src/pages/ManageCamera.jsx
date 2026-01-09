@@ -122,24 +122,65 @@ export default function ManageCamera() {
   };
 
   const getAddFields = () => {
+    // TODO: Fetch these options from API
+    const companyOptions = [
+      { value: "1", label: "Company A (ID: 1)" },
+      { value: "2", label: "Company B (ID: 2)" },
+      { value: "3", label: "Company C (ID: 3)" },
+      { value: "15", label: "Company D (ID: 15)" },
+    ];
+
+    const busOptions = [
+      { value: "1", label: "Bus 1" },
+      { value: "2", label: "Bus 2" },
+      { value: "3", label: "Bus 3" },
+      { value: "10", label: "Bus 10" },
+      { value: "11", label: "Bus 11" },
+      { value: "12", label: "Bus 12" },
+    ];
+
     return [
+      {
+        type: "text",
+        name: "device_name",
+        label: t('form.device_name', 'Device Name'),
+        defaultValue: "",
+      },
       {
         type: "text-lang",
         language: "EN_NUM",
-        name: "bus_id",
-        label: t('table.device_id', 'Device ID'),
+        name: "device_uid",
+        label: t('form.device_uid', 'Device UID'),
         defaultValue: "",
       },
-      // {
-      //   type: "select",
-      //   name: "installed_on_activate",
-      //   label: t('table.status', 'Status'),
-      //   defaultValue: "true",
-      //   options: [
-      //     { value: "true", label: t('manage_camera.active', 'Active') },
-      //     { value: "false", label: t('manage_camera.inactive', 'Inactive') },
-      //   ]
-      // }
+      {
+        type: "select",
+        name: "com_id",
+        label: t('form.com_id', 'Company'),
+        defaultValue: "",
+        options: [
+          { value: "", label: t('form.select_company', '-- Select Company --') },
+          ...companyOptions
+        ],
+      },
+      {
+        type: "select",
+        name: "bus_id",
+        label: t('form.bus_id', 'Bus'),
+        defaultValue: "",
+        options: [
+          { value: "", label: t('form.select_bus', '-- Select Bus --') },
+          ...busOptions
+        ],
+      },
+      {
+        type: "camera-group",
+        name: "cameras_group",
+        label: t('form.cameras_group', 'Camera Group (Doors)'),
+        defaultValue: [
+          { door_num: "", camera_top_uid: "", camera_face_uid: "" }
+        ],
+      },
     ];
   };
 
