@@ -10,10 +10,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Chip from '@mui/material/Chip';
 import { SkeletonCard, SkeletonCameraTableRow } from "../components/Skeleton";
+import { toast } from "../utils/ToastUtils";
 
 export default function ManageCamera() {
   const { t } = useTranslation();
-  const { cameras, loading, error, fetchCameras } = useCameraStore();
+  const { cameras, loading, error, fetchCameras, createDevice } = useCameraStore();
 
   // Local state for UI
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,10 +72,68 @@ export default function ManageCamera() {
     setIsEditModalOpen(false);
   };
 
-  const handleAddConfirm = (formData) => {
-    console.log("Adding new camera:", formData);
-    // TODO: Implement add action in store
-    setIsAddModalOpen(false);
+  const buildDevicePayload = (formData) => {
+    const toNumber = (value) => {
+      if (value === "" || value === null || value === undefined) return null;
+      const num = Number(value);
+      return Number.isNaN(num) ? null : num;
+    };
+
+    const camerasGroup = Array.isArray(formData.cameras_group)
+      ? formData.cameras_group.map((door) => ({
+        door_num: (door.door_num || "").trim(),
+        camera_top_uid: (door.camera_top_uid || "").trim(),
+        camera_face_uid: (door.camera_face_uid || "").trim(),
+      }))
+      : [];
+
+    return {
+      device_name: (formData.device_name || "").trim(),
+      device_uid: (formData.device_uid || "").trim(),
+      bus_id: toNumber(formData.bus_id),
+      com_id: toNumber(formData.com_id),
+      cameras_group: camerasGroup,
+    };
+  };
+
+  const validateDeviceForm = (payload) => {
+    if (!payload.device_name) return "กรุณากรอก Device Name";
+    if (!payload.device_uid) return "กรุณากรอก Device UID";
+    if (!payload.bus_id) return "กรุณาเลือก Bus";
+    if (!payload.com_id) return "กรุณาเลือก Company";
+
+    const nonEmptyDoors = payload.cameras_group.filter(
+      (door) => door.door_num || door.camera_top_uid || door.camera_face_uid
+    );
+
+    if (nonEmptyDoors.length === 0) return "กรุณาเพิ่มอย่างน้อย 1 กล้องต่อประตู";
+
+    const hasIncompleteDoor = nonEmptyDoors.some(
+      (door) => !door.door_num || !door.camera_top_uid || !door.camera_face_uid
+    );
+    if (hasIncompleteDoor) return "กรุณากรอกข้อมูลกล้องให้ครบทุกช่องในแต่ละประตู";
+
+    return null;
+  };
+
+  const handleAddConfirm = async (formData) => {
+    const payload = buildDevicePayload(formData);
+    const validationMessage = validateDeviceForm(payload);
+    if (validationMessage) {
+      toast.warning(validationMessage);
+      return;
+    }
+
+    try {
+      await createDevice(payload);
+      await fetchCameras();
+      toast.success("เพิ่มอุปกรณ์สำเร็จ");
+      setIsAddModalOpen(false);
+    } catch (error) {
+      const apiMessage = error?.response?.data?.message;
+      toast.error(apiMessage || "เพิ่มอุปกรณ์ไม่สำเร็จ");
+      console.error("Failed to add device:", error);
+    }
   };
 
   const handleDeleteConfirm = () => {

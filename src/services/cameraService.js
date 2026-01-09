@@ -22,6 +22,16 @@ const CameraService = {
             throw error;
         }
     },
+
+    createDevice: async (payload) => {
+        try {
+            const response = await api.post("/device", payload);
+            return response.data;
+        } catch (error) {
+            console.error("Error creating device:", error);
+            throw error;
+        }
+    },
 };
 
 export default CameraService;
