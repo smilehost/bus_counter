@@ -10,8 +10,9 @@ import {
   Box,
   Slide,
   TextField,
+  MenuItem,
 } from "@mui/material";
-import { X } from "lucide-react";
+import { X, Plus, Trash2 } from "lucide-react";
 import ThaiDatePicker from './dashboard/ThaiDatePicker';
 
 // Transition Effect
@@ -27,7 +28,7 @@ const TextInputWithLanguage = ({ value, onChange, label, language = "EN" }) => {
   // Regular expressions สำหรับแต่ละภาษา
   const languagePatterns = {
     TH: /^[\u0E00-\u0E7F\s]*$/, // ภาษาไทย + ช่องว่าง
-    EN: /^[a-zA-Z\s]*$/,         // ภาษาอังกฤษ + ช่องว่าง
+    EN_NUM: /^[a-zA-Z0-9\s!\"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~]*$/,    // ภาษาอังกฤษ + ตัวเลข (ไม่เอาช่องว่าง)
   };
 
   const handleInputChange = (e) => {
@@ -43,7 +44,8 @@ const TextInputWithLanguage = ({ value, onChange, label, language = "EN" }) => {
 
   const placeholders = {
     TH: "พิมพ์ภาษาไทยเท่านั้น",
-    EN: "Type in English only",
+    EN: "Type in English + symbols",
+    EN_NUM: "English and Numbers only",
   };
 
   return (
@@ -175,6 +177,118 @@ const NumberInput = ({ value, onChange, label, min = 0, max, step = 1 }) => {
   );
 };
 
+// 6. Camera Group Input (Dynamic array for door cameras)
+const CameraGroupInput = ({ value = [], onChange, label }) => {
+  const addDoor = () => {
+    const newDoor = {
+      door_num: "",
+      camera_top_uid: "",
+      camera_face_uid: ""
+    };
+    onChange([...value, newDoor]);
+  };
+
+  const removeDoor = (index) => {
+    const updated = value.filter((_, i) => i !== index);
+    onChange(updated);
+  };
+
+  const updateDoor = (index, fieldName, fieldValue) => {
+    const updated = value.map((door, i) =>
+      i === index ? { ...door, [fieldName]: fieldValue } : door
+    );
+    onChange(updated);
+  };
+
+  return (
+    <Box>
+      <Typography variant="caption" sx={{ color: "#6b7280", mb: 1, display: "block" }}>
+        {label}
+      </Typography>
+
+      {value.map((door, index) => (
+        <Box
+          key={index}
+          sx={{
+            p: 2,
+            mb: 2,
+            border: "1px solid #e5e7eb",
+            borderRadius: "12px",
+            backgroundColor: "#f9fafb"
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#374151" }}>
+              Door #{index + 1}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => removeDoor(index)}
+              sx={{ color: "#ef4444", "&:hover": { backgroundColor: "#fee2e2" } }}
+            >
+              <Trash2 size={16} />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Door Name (เช่น Front, Rear)"
+              value={door.door_num}
+              onChange={(e) => updateDoor(index, "door_num", e.target.value)}
+              placeholder="Front / Rear / Middle"
+              variant="outlined"
+              sx={{ backgroundColor: "white" }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Camera Top UID"
+              value={door.camera_top_uid}
+              onChange={(e) => updateDoor(index, "camera_top_uid", e.target.value)}
+              placeholder="1001"
+              variant="outlined"
+              sx={{ backgroundColor: "white" }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Camera Face UID"
+              value={door.camera_face_uid}
+              onChange={(e) => updateDoor(index, "camera_face_uid", e.target.value)}
+              placeholder="2001"
+              variant="outlined"
+              sx={{ backgroundColor: "white" }}
+            />
+          </Box>
+        </Box>
+      ))}
+
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<Plus size={16} />}
+        onClick={addDoor}
+        sx={{
+          borderStyle: "dashed",
+          color: "#6b7280",
+          borderColor: "#d1d5db",
+          textTransform: "none",
+          width: "100%",
+          "&:hover": {
+            borderColor: "#3b82f6",
+            color: "#3b82f6",
+            backgroundColor: "#eff6ff"
+          }
+        }}
+      >
+        Add Door
+      </Button>
+    </Box>
+  );
+};
+
 // ============================================
 // Main Modal Component
 // ============================================
@@ -234,6 +348,49 @@ export default function ReusableModal({
           />
         );
 
+      case "text":
+        return (
+          <Box key={field.name}>
+            <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+              {field.label}
+            </Typography>
+            <TextField
+              fullWidth
+              type="text"
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              placeholder={`Enter ${field.label}`}
+              variant="outlined"
+              size="small"
+              sx={{ borderRadius: "8px" }}
+            />
+          </Box>
+        );
+
+      case "select":
+        return (
+          <Box key={field.name}>
+            <Typography variant="caption" sx={{ color: "#6b7280", mb: 0.5, display: "block" }}>
+              {field.label}
+            </Typography>
+            <TextField
+              select
+              fullWidth
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{ borderRadius: "8px" }}
+            >
+              {field.options && field.options.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
+        );
+
       case "disabled":
         return (
           <DisabledInput
@@ -275,6 +432,16 @@ export default function ReusableModal({
             min={field.min}
             max={field.max}
             step={field.step}
+          />
+        );
+
+      case "camera-group":
+        return (
+          <CameraGroupInput
+            key={field.name}
+            label={field.label}
+            value={value || []}
+            onChange={(val) => handleFieldChange(field.name, val)}
           />
         );
 

@@ -35,5 +35,18 @@ export const useCameraStore = create((set, get) => ({
         }
     },
 
+    createDevice: async (payload) => {
+        set({ loading: true, error: null });
+        try {
+            const data = await CameraService.createDevice(payload);
+            set({ loading: false });
+            return data;
+        } catch (error) {
+            console.error("Store: Failed to create device", error);
+            set({ error: "Failed to create device", loading: false });
+            throw error;
+        }
+    },
+
     clearSelectedCamera: () => set({ selectedCamera: null }),
 }));

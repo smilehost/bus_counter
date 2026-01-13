@@ -10,10 +10,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Chip from '@mui/material/Chip';
 import { SkeletonCard, SkeletonCameraTableRow } from "../components/Skeleton";
+import { toast } from "../utils/ToastUtils";
 
 export default function ManageCamera() {
   const { t } = useTranslation();
-  const { cameras, loading, error, fetchCameras } = useCameraStore();
+  const { cameras, loading, error, fetchCameras, createDevice } = useCameraStore();
 
   // Local state for UI
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,10 +72,68 @@ export default function ManageCamera() {
     setIsEditModalOpen(false);
   };
 
-  const handleAddConfirm = (formData) => {
-    console.log("Adding new camera:", formData);
-    // TODO: Implement add action in store
-    setIsAddModalOpen(false);
+  const buildDevicePayload = (formData) => {
+    const toNumber = (value) => {
+      if (value === "" || value === null || value === undefined) return null;
+      const num = Number(value);
+      return Number.isNaN(num) ? null : num;
+    };
+
+    const camerasGroup = Array.isArray(formData.cameras_group)
+      ? formData.cameras_group.map((door) => ({
+        door_num: (door.door_num || "").trim(),
+        camera_top_uid: (door.camera_top_uid || "").trim(),
+        camera_face_uid: (door.camera_face_uid || "").trim(),
+      }))
+      : [];
+
+    return {
+      device_name: (formData.device_name || "").trim(),
+      device_uid: (formData.device_uid || "").trim(),
+      bus_id: toNumber(formData.bus_id),
+      com_id: toNumber(formData.com_id),
+      cameras_group: camerasGroup,
+    };
+  };
+
+  const validateDeviceForm = (payload) => {
+    if (!payload.device_name) return "กรุณากรอก Device Name";
+    if (!payload.device_uid) return "กรุณากรอก Device UID";
+    if (!payload.bus_id) return "กรุณาเลือก Bus";
+    if (!payload.com_id) return "กรุณาเลือก Company";
+
+    const nonEmptyDoors = payload.cameras_group.filter(
+      (door) => door.door_num || door.camera_top_uid || door.camera_face_uid
+    );
+
+    if (nonEmptyDoors.length === 0) return "กรุณาเพิ่มอย่างน้อย 1 กล้องต่อประตู";
+
+    const hasIncompleteDoor = nonEmptyDoors.some(
+      (door) => !door.door_num || !door.camera_top_uid || !door.camera_face_uid
+    );
+    if (hasIncompleteDoor) return "กรุณากรอกข้อมูลกล้องให้ครบทุกช่องในแต่ละประตู";
+
+    return null;
+  };
+
+  const handleAddConfirm = async (formData) => {
+    const payload = buildDevicePayload(formData);
+    const validationMessage = validateDeviceForm(payload);
+    if (validationMessage) {
+      toast.warning(validationMessage);
+      return;
+    }
+
+    try {
+      await createDevice(payload);
+      await fetchCameras();
+      toast.success("เพิ่มอุปกรณ์สำเร็จ");
+      setIsAddModalOpen(false);
+    } catch (error) {
+      const apiMessage = error?.response?.data?.message;
+      toast.error(apiMessage || "เพิ่มอุปกรณ์ไม่สำเร็จ");
+      console.error("Failed to add device:", error);
+    }
   };
 
   const handleDeleteConfirm = () => {
@@ -102,22 +161,11 @@ export default function ManageCamera() {
     if (!selectedCamera) return [];
     return [
       {
-        type: "text",
-        name: "camera_name",
-        label: t('table.camera_name', 'Camera Name'),
-        defaultValue: selectedCamera.camera_name,
-      },
-      {
-        type: "number",
+        type: "text-lang",
+        language: "EN_NUM",
         name: "bus_id",
-        label: t('table.bus_id', 'Bus ID'),
+        label: t('table.device_id', 'Device ID'),
         defaultValue: selectedCamera.bus_id,
-      },
-      {
-        type: "number",
-        name: "door_number",
-        label: t('table.door_number', 'Door Number'),
-        defaultValue: selectedCamera.door_number,
       },
       {
         type: "select",
@@ -133,41 +181,65 @@ export default function ManageCamera() {
   };
 
   const getAddFields = () => {
+    // TODO: Fetch these options from API
+    const companyOptions = [
+      { value: "1", label: "Company A (ID: 1)" },
+      { value: "2", label: "Company B (ID: 2)" },
+      { value: "3", label: "Company C (ID: 3)" },
+      { value: "15", label: "Company D (ID: 15)" },
+    ];
+
+    const busOptions = [
+      { value: "1", label: "Bus 1" },
+      { value: "2", label: "Bus 2" },
+      { value: "3", label: "Bus 3" },
+      { value: "10", label: "Bus 10" },
+      { value: "11", label: "Bus 11" },
+      { value: "12", label: "Bus 12" },
+    ];
+
     return [
       {
         type: "text",
-        name: "camera_name",
-        label: t('table.camera_name', 'Camera Name'),
+        name: "device_name",
+        label: t('form.device_name', 'Device Name'),
         defaultValue: "",
       },
       {
-        type: "number",
-        name: "bus_id",
-        label: t('table.bus_id', 'Bus ID'),
-        defaultValue: "",
-      },
-      {
-        type: "number",
-        name: "door_number",
-        label: t('table.door_number', 'Door Number'),
-        defaultValue: "1",
-      },
-      {
-        type: "text",
-        name: "installed_assces_key",
-        label: t('table.access_key', 'Access Key'),
+        type: "text-lang",
+        language: "EN_NUM",
+        name: "device_uid",
+        label: t('form.device_uid', 'Device UID'),
         defaultValue: "",
       },
       {
         type: "select",
-        name: "installed_on_activate",
-        label: t('table.status', 'Status'),
-        defaultValue: "true",
+        name: "com_id",
+        label: t('form.com_id', 'Company'),
+        defaultValue: "",
         options: [
-          { value: "true", label: t('manage_camera.active', 'Active') },
-          { value: "false", label: t('manage_camera.inactive', 'Inactive') },
-        ]
-      }
+          { value: "", label: t('form.select_company', '-- Select Company --') },
+          ...companyOptions
+        ],
+      },
+      {
+        type: "select",
+        name: "bus_id",
+        label: t('form.bus_id', 'Bus'),
+        defaultValue: "",
+        options: [
+          { value: "", label: t('form.select_bus', '-- Select Bus --') },
+          ...busOptions
+        ],
+      },
+      {
+        type: "camera-group",
+        name: "cameras_group",
+        label: t('form.cameras_group', 'Camera Group (Doors)'),
+        defaultValue: [
+          { door_num: "", camera_top_uid: "", camera_face_uid: "" }
+        ],
+      },
     ];
   };
 
@@ -176,8 +248,8 @@ export default function ManageCamera() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">{t('manage_camera.title')}</h1>
-          <p className="text-gray-500 mt-1">{t('manage_camera.subtitle', 'Manage all your installed cameras and configurations')}</p>
+          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">{t('manage_camera.title', 'Manage Devices')}</h1>
+          <p className="text-gray-500 mt-1">{t('manage_camera.subtitle', 'Manage all your installed Raspberry Pi 5 devices and configurations')}</p>
         </div>
         <div className="flex items-center gap-3">
           <CustomButton
@@ -195,7 +267,7 @@ export default function ManageCamera() {
             icon={<Plus size={20} />}
             onClick={() => setIsAddModalOpen(true)}
           >
-            {t('manage_camera.add_new_camera')}
+            {t('manage_camera.add_new_camera', 'Add New Device')}
           </CustomButton>
         </div>
       </div>
@@ -214,7 +286,7 @@ export default function ManageCamera() {
                 <Monitor size={24} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Cameras</p>
+                <p className="text-sm text-gray-500">Total Devices</p>
                 <p className="text-2xl font-bold text-gray-800">{cameras.length}</p>
               </div>
             </div>
@@ -239,7 +311,7 @@ export default function ManageCamera() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder={t('manage_camera.search_placeholder', 'Search camera, bus ID...')}
+            placeholder={t('manage_camera.search_placeholder', 'Search device ID...')}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -270,8 +342,8 @@ export default function ManageCamera() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold tracking-wider">
                 <th className="px-6 py-4">ID</th>
-                <th className="px-6 py-4">{t('table.camera_info', 'Camera Info')}</th>
-                <th className="px-6 py-4">{t('table.bus_info', 'Bus / Door')}</th>
+                <th className="px-6 py-4">{t('table.device_info', 'Device Info')}</th>
+                {/* <th className="px-6 py-4">{t('table.bus_info', 'Bus / Door')}</th> */}
                 <th className="px-6 py-4">{t('table.access_key', 'Access Key')}</th>
                 <th className="px-6 py-4 text-center">{t('table.status', 'Status')}</th>
                 <th className="px-6 py-4 text-center">{t('table.actions', 'Actions')}</th>
@@ -315,12 +387,12 @@ export default function ManageCamera() {
                           <Monitor size={20} />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">{cam.camera_name}</p>
+                          <p className="font-semibold text-gray-900">{t('table.device_id', 'Device')} {cam.bus_id}</p>
                           <p className="text-xs text-gray-500">Updated: {new Date(cam.updated_at).toLocaleDateString()}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2 text-sm text-gray-700">
                           <Bus size={16} className="text-gray-400" />
@@ -331,7 +403,7 @@ export default function ManageCamera() {
                           <span>Door {cam.door_number}</span>
                         </div>
                       </div>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <code className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-mono border border-gray-200 min-w-[100px]">
@@ -421,7 +493,7 @@ export default function ManageCamera() {
       <ReusableModal
         open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        title={t('manage_camera.edit_camera')}
+        title={t('manage_camera.edit_camera', 'Edit Device')}
         confirmText={t('common.save')}
         onConfirm={handleEditConfirm}
         fields={getEditFields()}
@@ -432,7 +504,7 @@ export default function ManageCamera() {
       <ReusableModal
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title={t('manage_camera.add_new_camera', 'Add New Camera')}
+        title={t('manage_camera.add_new_camera', 'Add New Device')}
         confirmText={t('common.add', 'Add')}
         onConfirm={handleAddConfirm}
         fields={getAddFields()}
@@ -443,19 +515,19 @@ export default function ManageCamera() {
       <ReusableModal
         open={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        title={t('manage_camera.delete_camera')}
+        title={t('manage_camera.delete_camera', 'Delete Device')}
         confirmText={t('common.delete')}
         variant="danger"
         onConfirm={handleDeleteConfirm}
         fields={[
           {
             type: 'info',
-            label: t('table.camera_name'),
-            value: selectedCamera?.camera_name
+            label: t('table.device_id', 'Device ID'),
+            value: selectedCamera?.bus_id
           },
           {
             type: 'warning',
-            message: t('manage_camera.delete_confirmation', 'Are you sure you want to delete this camera? This action cannot be undone.')
+            message: t('manage_camera.delete_confirmation', 'Are you sure you want to delete this device? This action cannot be undone.')
           }
         ]}
       />
