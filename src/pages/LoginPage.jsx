@@ -4,6 +4,7 @@ export default function LoginPage() {
   const handleLogin = () => {
     // Redirect ไปยัง Bussing Authen Center
     window.location.href =
+      import.meta.env.AUTH_SERVICE_UUID ||
       "https://authen-center.lab.bussing.app/login?service=32c4c2eb-2037-474f-8c75-2042ea85222f";
   };
 
